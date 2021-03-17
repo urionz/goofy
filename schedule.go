@@ -4,14 +4,10 @@ import (
 	"fmt"
 
 	"github.com/robfig/cron/v3"
+	"github.com/urionz/goofy/contracts"
 )
 
-type (
-	ScheduleJob map[string][]interface{}
-	FuncJob     = cron.FuncJob
-)
-
-func (app *Application) AddSchedules(scheduleJob ScheduleJob) IApplication {
+func (app *Application) AddSchedules(scheduleJob contracts.ScheduleJob) contracts.Application {
 	for spec, jobs := range scheduleJob {
 		for _, job := range jobs {
 			switch j := job.(type) {

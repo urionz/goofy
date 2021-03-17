@@ -19,7 +19,7 @@ func TestApplication_AddServices(t *testing.T) {
 	t.Run("add service not err", func(t *testing.T) {
 		app := goofy.New()
 		require.NotPanics(t, func() {
-			app.AddServices(func(a goofy.IApplication) {
+			app.AddServices(func(a goofy.Application) {
 				a.Provide(func() *TestImpl {
 					return new(TestImpl)
 				})
@@ -32,7 +32,7 @@ func TestApplication_AddServices(t *testing.T) {
 	t.Run("add service with err should panic", func(t *testing.T) {
 		app := goofy.New()
 		require.Panics(t, func() {
-			app.AddServices(func(a goofy.IApplication) error {
+			app.AddServices(func(a goofy.Application) error {
 				return fmt.Errorf("test add service with err")
 			}).Run()
 		})

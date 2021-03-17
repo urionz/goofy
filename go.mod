@@ -3,15 +3,26 @@ module github.com/urionz/goofy
 go 1.14
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.2.9
+	github.com/fsnotify/fsnotify v1.4.9
+	github.com/go-delve/delve v1.6.0
+	github.com/go-redis/redis/v8 v8.7.1
 	github.com/goava/di v1.9.0
+	github.com/golang-module/carbon v1.3.4
 	github.com/gookit/event v1.0.4
-	//github.com/goava/slice v0.2.4 // indirect
-	//github.com/goofy/cli v0.0.0-00010101000000-000000000000
-	//github.com/goofy/config v0.0.0-00010101000000-000000000000
-	//github.com/goofy/di v0.0.0-00010101000000-000000000000
-	//github.com/goofy/event v0.0.0-00010101000000-000000000000
-	//github.com/kataras/iris/v12 v12.2.0-alpha2.0.20210219075829-bfbed2f84174 // indirect
+	github.com/gookit/gcli/v3 v3.0.0-20210317033206-b4ab755d7375
+	github.com/jinzhu/inflection v1.0.0
+	github.com/kataras/iris/v12 v12.2.0-alpha2.0.20210219075829-bfbed2f84174
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/stretchr/testify v1.6.1
-	github.com/urionz/cobra v1.1.6
+	github.com/stretchr/testify v1.7.0
+	github.com/urionz/collection v1.3.3
+	github.com/urionz/color v1.3.9
+	github.com/urionz/config v1.1.1-0.20210301084331-76f34bf46ec3
+	github.com/urionz/goutil v0.4.1
+	github.com/urionz/ini v1.1.1-0.20210301084658-9746b6337838
+	go.uber.org/zap v1.16.0
+	gorm.io/driver/mysql v1.0.4
+	gorm.io/gorm v1.21.3
 )

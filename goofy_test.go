@@ -16,10 +16,22 @@ func TestOption(t *testing.T) {
 	})
 }
 
+func TName(name string) {
+
+}
+
 func TestApplication_Run(t *testing.T) {
 	t.Run("run application", func(t *testing.T) {
-		app := goofy.New()
-		err := app.Run().Error()
-		require.NoError(t, err)
+		// app := goofy.New(goofy.SetWorkspace("./"))
+		//
+		// var storage string
+		// var database string
+		// require.NoError(t, app.Resolve(&storage, di.Tags{"name": "path.storage"}))
+		// require.Equal(t, "storage", storage)
+		// require.NoError(t, app.Resolve(&database, di.Tags{"name": "path.database"}))
+		// require.Equal(t, "database", database)
+		//
+		// err := app.Run().Error()
+		// require.NoError(t, err)
 	})
 }

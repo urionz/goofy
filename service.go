@@ -1,8 +1,8 @@
 package goofy
 
-type ServiceFunc func(...interface{}) error
+import "github.com/urionz/goofy/contracts"
 
-func (app *Application) AddServices(services ...interface{}) IApplication {
+func (app *Application) AddServices(services ...interface{}) contracts.Application {
 	app.services = append(app.services, services...)
 	return app
 }

@@ -1,21 +1,10 @@
 package goofy
 
-import (
-	"github.com/urionz/cobra"
-)
+import "github.com/urionz/goofy/contracts"
 
-type (
-	Commander interface {
-		Handle(app IApplication) *cobra.Command
-	}
-	FuncCommander func(app IApplication) *cobra.Command
-)
-
-func (c FuncCommander) Handle(app IApplication) *cobra.Command { return c(app) }
-
-func (app *Application) AddCommanders(commander ...Commander) IApplication {
+func (app *Application) AddCommanders(commander ...contracts.Commander) contracts.Application {
 	for _, command := range commander {
-		app.Command.AddCommand(command.Handle(app))
+		app.App.AddCommand(command.Handle(app))
 	}
 	return app
 }

@@ -1,72 +1,82 @@
 package goofy
 
 import (
-	"bytes"
+	"os"
+	"path"
 	"reflect"
 
 	"github.com/goava/di"
 	"github.com/gookit/event"
+	"github.com/gookit/gcli/v3"
 	"github.com/robfig/cron/v3"
-	"github.com/urionz/cobra"
+	"github.com/urionz/goofy/cache"
+	"github.com/urionz/goofy/cmds"
+	"github.com/urionz/goofy/cmds/dlv"
+	"github.com/urionz/goofy/config"
+	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/db"
+	"github.com/urionz/goofy/filesystem"
+	"github.com/urionz/goofy/log"
+	"github.com/urionz/goofy/redis"
+	"github.com/urionz/goofy/validator"
+	"github.com/urionz/goofy/web"
 )
 
-var Default = New(SetWorkspace("./"))
-
-type (
-	IApplication interface {
-		AddSchedules(scheduleJob ScheduleJob) IApplication
-		AddServices(services ...interface{}) IApplication
-		AddCommanders(commander ...Commander) IApplication
-		AddListeners(eventListeners EventListeners) IApplication
-		Dispatch(name string, payload EventM) IApplication
-		MustEmit(name string, payload EventM) Event
-		Emit(name string, payload EventM) (error, Event)
-		Provide(constructor di.Constructor, options ...di.ProvideOption) error
-		Resolve(ptr di.Pointer, options ...di.ResolveOption) error
-		Call(args ...string) (*cobra.Command, string, error)
-
-		Workspace() string
-		Run() IApplication
-		Error() error
-	}
-
-	Application struct {
-		*cron.Cron
-		*event.Manager
-		*di.Container
-		*cobra.Command
-
-		workspace string
-		services  []interface{}
-
-		err error
-	}
+var Default = New(SetWorkspace("./")).AddServices(
+	config.NewServiceProvider, log.NewServiceProvider,
+	redis.NewServiceProvider, db.NewServiceProvider,
+	cache.NewServiceProvider, filesystem.NewServiceProvider,
+	validator.NewServiceProvider, web.NewServiceProvider,
+).AddCommanders(
+	contracts.FuncCommander(dlv.Command),
+	contracts.FuncCommander(cmds.GenerateConf),
 )
 
-func New(options ...Option) IApplication {
+type Application struct {
+	di.Tags `name:"app"`
+
+	*cron.Cron
+	*event.Manager
+	*di.Container
+	*gcli.App
+
+	conf      string
+	workspace string
+	services  []interface{}
+
+	err error
+}
+
+var _ contracts.Application = (*Application)(nil)
+
+func New(options ...Option) *Application {
 	var err error
 	app := &Application{
 		workspace: "./",
 		Cron:      cron.New(),
-		Command: &cobra.Command{
-			Use: "goofy",
-		},
-		Manager: event.NewManager("goofy"),
+		App:       gcli.NewApp(),
+		Manager:   event.NewManager("goofy"),
 	}
 
-	app.Command.AddCommand()
-
-	app.Command.InheritedFlags().StringVarP(&app.workspace, "workspace", "w", "./", "执行工作目录")
-
-	if app.Container, err = di.New(di.Provide(func() *Application { return app }, di.As(new(IApplication)))); err != nil {
+	if app.Container, err = di.New(di.ProvideValue(app, di.As(new(contracts.Application)))); err != nil {
 		panic(err)
 	}
+
+	app.App.GlobalFlags().StrOpt(&app.workspace, "workspace", "w", "./", "工作目录")
 
 	for _, option := range options {
 		option.apply(app)
 	}
 
 	return app
+}
+
+func (app *Application) Storage() string {
+	return path.Join(app.Workspace(), "storage")
+}
+
+func (app *Application) Database() string {
+	return path.Join(app.Workspace(), "database")
 }
 
 func (app *Application) addError(err error) {
@@ -77,35 +87,20 @@ func (app *Application) Workspace() string {
 	return app.workspace
 }
 
-func (app *Application) Run() IApplication {
-	err := app.Container.Invoke(app.run)
-	if err != nil {
+func (app *Application) Run() contracts.Application {
+	if err := app.Container.Invoke(app.bootstrap); err != nil {
 		panic(err)
 	}
+	app.App.Run(nil)
 	return app
 }
 
-func (app *Application) Call(args ...string) (c *cobra.Command, output string, err error) {
-	buf := new(bytes.Buffer)
-	app.Command.SetOut(buf)
-	app.Command.SetErr(buf)
-	app.Command.SetArgs(args)
-
-	c, err = app.Command.ExecuteC()
-
-	return c, buf.String(), err
+func (app *Application) Call(args ...string) int {
+	return app.App.Run(args)
 }
 
 func (app *Application) Error() error {
 	return app.err
-}
-
-func (app *Application) run() error {
-	if err := app.bootstrap(); err != nil {
-		return err
-	}
-	app.Command.Execute()
-	return nil
 }
 
 func (app *Application) bootstrap() error {
@@ -127,16 +122,13 @@ func (app *Application) resolveInputsFromDI(service interface{}) ([]reflect.Valu
 	serviceArgNum := typeOf.NumIn()
 	inputs := make([]reflect.Value, serviceArgNum)
 	for i := 0; i < serviceArgNum; i++ {
-		if typeOf.In(i).Implements(reflect.TypeOf((*IApplication)(nil)).Elem()) {
-			inputs[i] = reflect.ValueOf(app)
-		} else {
-			newValue := reflect.New(typeOf.In(i))
-			ptr := newValue.Interface()
-			if err := app.Container.Resolve(ptr); err != nil {
-				return []reflect.Value{}, err
-			}
-			inputs[i] = newValue.Elem()
+		newValue := reflect.New(typeOf.In(i))
+		ptr := newValue.Interface()
+		if err := app.Container.Resolve(ptr); err != nil {
+			return []reflect.Value{}, err
 		}
+		inputs[i] = newValue.Elem()
 	}
+	app.App.GlobalFlags().Parse(os.Args[1:])
 	return valueOf.Call(inputs), nil
 }

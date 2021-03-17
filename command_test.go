@@ -3,19 +3,20 @@ package goofy_test
 import (
 	"testing"
 
+	"github.com/gookit/gcli/v3"
 	"github.com/stretchr/testify/require"
-	"github.com/urionz/cobra"
 	"github.com/urionz/goofy"
+	"github.com/urionz/goofy/contracts"
 )
 
 type StructCommand struct {
 }
 
-func (*StructCommand) Handle(_ goofy.IApplication) *cobra.Command {
-	return &cobra.Command{
-		Use: "test",
-		Run: func(cmd *cobra.Command, args []string) {
-
+func (*StructCommand) Handle(_ contracts.Application) *gcli.Command {
+	return &gcli.Command{
+		Name: "test",
+		Func: func(cmd *gcli.Command, args []string) error {
+			return nil
 		},
 	}
 }
@@ -23,11 +24,11 @@ func (*StructCommand) Handle(_ goofy.IApplication) *cobra.Command {
 func TestApplication_AddCommander(t *testing.T) {
 	t.Run("add commander", func(t *testing.T) {
 		app := goofy.New()
-		err := app.AddCommanders(goofy.FuncCommander(func(app goofy.IApplication) *cobra.Command {
-			return &cobra.Command{
-				Use: "test",
-				Run: func(c *cobra.Command, args []string) {
-
+		err := app.AddCommanders(contracts.FuncCommander(func(app contracts.Application) *gcli.Command {
+			return &gcli.Command{
+				Name: "test",
+				Func: func(cmd *gcli.Command, args []string) error {
+					return nil
 				},
 			}
 		})).Error()

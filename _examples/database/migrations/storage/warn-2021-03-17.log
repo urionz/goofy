@@ -1,0 +1,3 @@
+2021-03-17 11:55:28	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/Docker/wwwroot/github.urionz/goofy/db/migrate/migrate_command.go:140	nothing to migrate
+2021-03-17 12:03:18	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/Docker/wwwroot/github.urionz/goofy/db/migrate/migrate_command.go:149	nothing to migrate
+2021-03-17 13:45:45	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/Docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:154	nothing to migrate
