@@ -3,6 +3,7 @@ package repl
 import (
 	"fmt"
 	"os"
+	"path"
 	"runtime/debug"
 
 	"github.com/c-bata/go-prompt"
@@ -40,7 +41,7 @@ func Command(_ contracts.Application) *gcli.Command {
 			}
 			p := prompt.New(handler, completer, prompt.OptionPrefix(">>> "))
 			p.Run()
-			return nil
+			return os.RemoveAll(path.Join(wd, ".repl"))
 		},
 	}
 }
@@ -64,6 +65,5 @@ func handler(input string) {
 		fmt.Print(err.Error())
 		return
 	}
-
 	fmt.Print(out)
 }

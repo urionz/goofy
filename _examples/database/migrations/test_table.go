@@ -31,5 +31,5 @@ func (table *FQQDQD) Up(db *gorm.DB) error {
 }
 
 func (table *FQQDQD) Down(db *gorm.DB) error {
-	return nil
+	return db.Migrator().DropTable(table)
 }

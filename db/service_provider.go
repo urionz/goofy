@@ -13,7 +13,8 @@ func NewServiceProvider(app contracts.Application, conf contracts.Config) error 
 		contracts.FuncCommander(migrate.Make), contracts.FuncCommander(migrate.Migrate),
 		contracts.FuncCommander(migrate.Rollback), contracts.FuncCommander(migrate.Status),
 		contracts.FuncCommander(migrate.Reset), contracts.FuncCommander(migrate.Refresh),
-		contracts.FuncCommander(model.Make), contracts.FuncCommander(seed.Seed),
+		contracts.FuncCommander(migrate.Fresh), contracts.FuncCommander(model.Make),
+		contracts.FuncCommander(seed.Seed),
 	)
 	instance = NewManager(conf)
 	return app.ProvideValue(instance, di.As(new(contracts.DBFactory)))

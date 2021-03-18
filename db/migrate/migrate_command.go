@@ -13,16 +13,15 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/golang-module/carbon"
+	"github.com/gookit/color"
 	"github.com/gookit/gcli/v3"
-	"github.com/gookit/gcli/v3/progress"
-	"github.com/gookit/gcli/v3/show"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/urionz/collection"
-	"github.com/urionz/color"
 	"github.com/urionz/goofy/contracts"
-	"github.com/urionz/goofy/log"
 	"github.com/urionz/goutil/fsutil"
 	"github.com/urionz/goutil/strutil"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var createStub = `package migrations
@@ -95,19 +94,25 @@ func (table *{{ .StructName }}) Down(db *gorm.DB) error {
 `
 
 var (
-	step   int
-	conn   string
-	table  string
-	create string
+	step      int
+	driver    string
+	tableName string
+	create    string
+	conn      *gorm.DB
 )
 
 func SwitchDBConnection(app contracts.Application) error {
 	var conf contracts.Config
+	var manager contracts.DBFactory
 	if err := app.Resolve(&conf); err != nil {
-		log.Fatal(err)
+		color.Errorln(err)
 		return err
 	}
-	if conn == "" {
+	if err := app.Resolve(&manager); err != nil {
+		color.Errorln(err)
+		return err
+	}
+	if driver == "" {
 		sw := false
 		prompt := &survey.Confirm{
 			Message: "当前设置数据库连接为空，将使用默认连接，是否切换连接？",
@@ -126,6 +131,11 @@ func SwitchDBConnection(app contracts.Application) error {
 			survey.AskOne(prompt, conn)
 		}
 	}
+
+	conn = manager.Connection(driver)
+
+	conn.Config.Logger = logger.Discard
+
 	return nil
 }
 
@@ -134,22 +144,20 @@ func Migrate(app contracts.Application) *gcli.Command {
 		Name: "migrate",
 		Desc: "运行迁移",
 		Config: func(c *gcli.Command) {
-			c.StrOpt(&conn, "conn", "", "", "指定数据库连接")
+			c.StrOpt(&driver, "conn", "", "", "指定数据库连接")
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
 		Func: func(c *gcli.Command, args []string) error {
-			var manager contracts.DBFactory
-			if err := app.Resolve(&manager); err != nil {
+
+			if err := SwitchDBConnection(app); err != nil {
+				color.Warnln(err)
 				return err
 			}
 
-			if err := SwitchDBConnection(app); err != nil {
-				log.Fatal(err)
-			}
-
 			changeDir(path.Join(app.Database(), "migrations"))
-			if err := RunMigrate(step, manager.Connection(conn)); err != nil {
-				log.Fatal(err)
+			if err := RunMigrate(step); err != nil {
+				color.Warnln(err)
+				return err
 			}
 			return nil
 		},
@@ -173,11 +181,13 @@ func Rollback(app contracts.Application) *gcli.Command {
 			}
 
 			if err := SwitchDBConnection(app); err != nil {
-				log.Fatal(err)
+				color.Errorln(err)
+				return err
 			}
 
-			if err := RunRollback(step, manager.Connection(conn)); err != nil {
-				log.Error(err)
+			if err := RunRollback(step); err != nil {
+				color.Errorln(err)
+				return err
 			}
 			return nil
 		},
@@ -194,29 +204,25 @@ func Refresh(app contracts.Application) *gcli.Command {
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
 		Func: func(c *gcli.Command, args []string) error {
-			var manager contracts.DBFactory
 			var err error
-			if err = app.Resolve(&manager); err != nil {
-				return err
-			}
-
 			if err = SwitchDBConnection(app); err != nil {
-				log.Fatal(err)
+				color.Errorln(err)
+				return err
 			}
 
 			if step > 0 {
-				err = RunRollback(step, manager.Connection(conn))
+				err = RunRollback(step)
 			} else {
-				err = RunReset(manager.Connection(conn))
+				err = RunReset()
 			}
 
 			if err != nil {
-				log.Error(err)
+				color.Errorln(err)
 				return err
 			}
 
-			if err = RunMigrate(step, manager.Connection()); err != nil {
-				log.Error(err)
+			if err = RunMigrate(step); err != nil {
+				color.Errorln(err)
 				return err
 			}
 			return nil
@@ -234,26 +240,30 @@ func Fresh(app contracts.Application) *gcli.Command {
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
 		Func: func(c *gcli.Command, args []string) error {
-			var manager contracts.DBFactory
-			if err := app.Resolve(&manager); err != nil {
+			var err error
+			var tables []string
+
+			if err = SwitchDBConnection(app); err != nil {
+				color.Errorln(err)
 				return err
 			}
-			var tables []string
-			db := manager.Connection()
-			if err := db.Raw("show tables").Scan(&tables).Error; err != nil {
+
+			if err := conn.Raw("show tables").Scan(&tables).Error; err != nil {
+				color.Errorln(err)
 				return err
 			}
 
 			for _, table := range tables {
-				if err := db.Migrator().DropTable(table); err != nil {
+				if err := conn.Migrator().DropTable(table); err != nil {
+					color.Errorln(err)
 					return err
 				}
 			}
 
-			log.Info("Dropped all tables successfully.")
+			color.Infoln("Dropped all tables successfully.")
 
-			if err := RunMigrate(step, manager.Connection()); err != nil {
-				log.Error(err)
+			if err := RunMigrate(step); err != nil {
+				color.Errorln(err)
 				return err
 			}
 			return nil
@@ -264,50 +274,53 @@ func Fresh(app contracts.Application) *gcli.Command {
 }
 
 func Status(app contracts.Application) *gcli.Command {
-	var db *gorm.DB
 	command := &gcli.Command{
 		Name: "migrate-status",
 		Desc: "查看迁移状态",
 		Func: func(c *gcli.Command, args []string) error {
-			if err := app.Resolve(&db); err != nil {
-				return err
-			}
 			var batches map[string]int
 			var ran []*Model
 			var err error
-			repository := NewDBMigration(db)
+
+			if err = SwitchDBConnection(app); err != nil {
+				color.Errorln(err)
+				return err
+			}
+
+			repository := NewDBMigration(conn)
 			ran, err = repository.GetRan()
 			if err != nil {
-				log.Error(err)
-				return nil
+				color.Errorln(err)
+				return err
 			}
 			ranNameCollection := collection.NewObjPointCollection(ran).Pluck("Migration")
 
 			batches, err = repository.GetMigrationBatches()
 			if err != nil {
-				log.Error(err)
+				color.Errorln(err)
 				return err
 			}
-			table := show.NewTable("migrate status")
-			table.Cols = []string{"Ran?", "Migration", "Batch"}
+
+			t := table.NewWriter()
+			t.SetOutputMirror(os.Stdout)
+			t.AppendHeader(table.Row{"Ran?", "Migration", "Batch"})
 			for _, migrateFile := range GetMigrationFiles() {
 				migrationName := GetMigrationName(migrateFile)
 				if ranNameCollection.Contains(migrationName) {
-					table.Cols = []string{
+					t.AppendRow(table.Row{
 						color.String("<green>Yes</>"),
 						migrationName,
 						strconv.Itoa(batches[migrationName]),
-					}
+					})
 				} else {
-					table.Cols = []string{
+					t.AppendRow(table.Row{
 						color.String("<red>No</>"),
 						migrationName,
 						"",
-					}
+					})
 				}
 			}
-			table.SetOutput(os.Stdout)
-			table.Println()
+			t.Render()
 			return nil
 		},
 	}
@@ -320,15 +333,12 @@ func Reset(app contracts.Application) *gcli.Command {
 		Name: "migrate-reset",
 		Desc: "重置迁移",
 		Func: func(c *gcli.Command, args []string) error {
-			var manager contracts.DBFactory
-			if err := app.Resolve(&manager); err != nil {
+			if err := SwitchDBConnection(app); err != nil {
+				color.Errorln(err)
 				return err
 			}
-			if err := SwitchDBConnection(app); err != nil {
-				log.Fatal(err)
-			}
-			if err := RunReset(manager.Connection(conn)); err != nil {
-				log.Error(err)
+			if err := RunReset(); err != nil {
+				color.Errorln(err)
 				return err
 			}
 			return nil
@@ -349,7 +359,7 @@ func Make(app contracts.Application) *gcli.Command {
 		Category: "make",
 		Desc:     "创建迁移文件",
 		Config: func(c *gcli.Command) {
-			c.StrOpt(&table, "table", "t", "", "The table to migrate")
+			c.StrOpt(&tableName, "table", "t", "", "The table to migrate")
 			c.StrOpt(&create, "create", "c", "", "The table to be created")
 		},
 		Func: func(c *gcli.Command, args []string) error {
@@ -370,28 +380,29 @@ func Make(app contracts.Application) *gcli.Command {
 			}
 
 			if err := os.MkdirAll(path.Join(app.Database(), "migrations"), os.ModePerm); err != nil {
-				log.Error(err)
+				color.Errorln(err)
+				return err
 			}
 
 			name = strutil.ToSnake(name)
 
-			if table == "" && create != "" {
-				table = create
+			if tableName == "" && create != "" {
+				tableName = create
 				isCreate = true
 			}
 
-			if table == "" {
-				table, isCreate = NewTableGuesser().Guess(name)
+			if tableName == "" {
+				tableName, isCreate = NewTableGuesser().Guess(name)
 			}
 
 			generatePath := path.Join(app.Database(), "migrations")
 
-			if err := WriteMigration(name, table, generatePath, isCreate); err != nil {
-				log.Error(err)
+			if err := WriteMigration(name, tableName, generatePath, isCreate); err != nil {
+				color.Errorln(err)
 				return err
 			}
 
-			log.Info("执行完毕")
+			color.Infoln("执行完毕")
 
 			return nil
 		},
@@ -457,9 +468,9 @@ func populateStub(stub, table string) (string, error) {
 	return templateBuffer.String(), nil
 }
 
-func RunPending(migrations []contracts.MigrateFile, step int, db *gorm.DB) error {
+func RunPending(migrations []contracts.MigrateFile, step int) error {
 	repository := &Model{
-		DB: db,
+		DB: conn,
 	}
 
 	if len(migrations) == 0 {
@@ -473,61 +484,53 @@ func RunPending(migrations []contracts.MigrateFile, step int, db *gorm.DB) error
 		return err
 	}
 
-	p := progress.Bar(len(migrations))
-	p.Start()
-
 	for _, migrationFile := range migrations {
-
-		if err := RunUp(migrationFile, batch, db); err != nil {
+		if err := RunUp(migrationFile, batch); err != nil {
 			return err
 		}
-
 		if step > 0 {
 			batch++
 		}
-		p.Advance()
 	}
-
-	p.Finish()
 
 	return nil
 }
 
-func RunUp(file contracts.MigrateFile, batch int, db *gorm.DB) error {
+func RunUp(file contracts.MigrateFile, batch int) error {
 	repository := &Model{
-		DB: db,
+		DB: conn,
 	}
 	name := GetMigrationName(file)
 
-	log.Info("Migrating:", name)
+	color.Infoln("Migrating:", name)
 
-	if err := file.Up(db); err != nil {
+	if err := file.Up(conn); err != nil {
 		return err
 	}
 	if err := repository.Log(name, batch); err != nil {
 		return err
 	}
 
-	log.Info("Migrated:", name)
+	color.Infoln("Migrated:", name)
 
 	return nil
 }
 
-func RunRollback(step int, db *gorm.DB) error {
-	repository := NewDBMigration(db)
+func RunRollback(step int) error {
+	repository := NewDBMigration(conn)
 	dbMigrations, err := GetMigrationsForRollback(step, repository)
 
 	if err != nil {
 		return err
 	}
 
-	return RollbackMigrations(dbMigrations, db)
+	return RollbackMigrations(dbMigrations)
 }
 
-func RunReset(db *gorm.DB) error {
+func RunReset() error {
 	var migrations []*Model
 	var err error
-	migrations, err = NewDBMigration(db).GetRan()
+	migrations, err = NewDBMigration(conn).GetRan()
 	if err != nil {
 		return err
 	}
@@ -537,14 +540,14 @@ func RunReset(db *gorm.DB) error {
 		return err
 	}
 
-	return RollbackMigrations(migrations, db)
+	return RollbackMigrations(migrations)
 }
 
-func RunMigrate(step int, db *gorm.DB) error {
+func RunMigrate(step int) error {
 	var ran []*Model
 	var err error
 
-	if ran, err = NewDBMigration(db).GetRan(); err != nil {
+	if ran, err = NewDBMigration(conn).GetRan(); err != nil {
 		return err
 	}
 
@@ -554,7 +557,7 @@ func RunMigrate(step int, db *gorm.DB) error {
 
 	SortFileMigrations(pendingMigrateFiles)
 
-	if err := RunPending(pendingMigrateFiles, step, db); err != nil {
+	if err := RunPending(pendingMigrateFiles, step); err != nil {
 		return err
 	}
 	return nil
@@ -597,7 +600,7 @@ func GetMigrationsForRollback(step int, repository *Model) ([]*Model, error) {
 	return dbMigrates, err
 }
 
-func RollbackMigrations(migrations []*Model, db *gorm.DB) error {
+func RollbackMigrations(migrations []*Model) error {
 	files := GetMigrationFiles()
 
 	existsFileMigrates := func(dbMigrate *Model) (contracts.MigrateFile, bool) {
@@ -615,11 +618,11 @@ func RollbackMigrations(migrations []*Model, db *gorm.DB) error {
 		file, exists := existsFileMigrates(migration)
 
 		if !exists {
-			log.Warn("Migration not found:", migration.Migration)
+			color.Warnln("Migration not found:", migration.Migration)
 			continue
 		}
 
-		if err := RunDown(file, migration, db); err != nil {
+		if err := RunDown(file, migration); err != nil {
 			return err
 		}
 	}
@@ -627,16 +630,16 @@ func RollbackMigrations(migrations []*Model, db *gorm.DB) error {
 	return nil
 }
 
-func RunDown(file contracts.MigrateFile, migration *Model, db *gorm.DB) (err error) {
+func RunDown(file contracts.MigrateFile, migration *Model) (err error) {
 	repository := &Model{
-		DB: db,
+		DB: conn,
 	}
 
 	name := GetMigrationName(file)
 
-	log.Info("Rolling back:", name)
+	color.Infoln("Rolling back:", name)
 
-	if err := file.Down(db); err != nil {
+	if err := file.Down(conn); err != nil {
 		return err
 	}
 
@@ -644,13 +647,14 @@ func RunDown(file contracts.MigrateFile, migration *Model, db *gorm.DB) (err err
 		return err
 	}
 
-	log.Info("Rolled back:", name)
+	color.Infoln("Rolled back:", name)
 
 	return nil
 }
 
 func changeDir(dir string) {
 	if err := os.Chdir(dir); err != nil {
-		log.Fatal(err)
+		color.Errorln(err)
+		os.Exit(0)
 	}
 }

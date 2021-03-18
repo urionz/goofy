@@ -73,7 +73,7 @@ func (m *Manager) resolve(name string) (conn *gorm.DB, err error) {
 			log.New(io.MultiWriter(writes...), "\r\n", log.LstdFlags),
 			logger.Config{
 				SlowThreshold: time.Duration(conf.Int("slow_threshold", 100)) * time.Millisecond,
-				LogLevel:      logger.Info,
+				LogLevel:      logger.Error,
 				Colorful:      true,
 			},
 		),
