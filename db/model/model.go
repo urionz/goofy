@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/urionz/goofy/contracts"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +17,12 @@ type BaseModel struct {
 	CreatedAt FmtTime        `json:"created_at"`
 	UpdatedAt FmtTime        `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+var _ contracts.DBConnection = (*BaseModel)(nil)
+
+func (*BaseModel) Connection() string {
+	return ""
 }
 
 type JSON []byte

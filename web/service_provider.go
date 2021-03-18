@@ -41,7 +41,6 @@ func (cmd *engine) Handle(app contracts.Application) *gcli.Command {
 			c.IntOpt(&cmd.port, "port", "p", conf.Int("http.port", 3000), "web服务监听端口")
 		},
 		Func: func(c *gcli.Command, args []string) error {
-
 			addr := fmt.Sprintf("0.0.0.0:%d", cmd.port)
 			cmd.SetName(cmd.name)
 			if cmd.debug {

@@ -1,37 +1,69 @@
 package repl
 
 import (
+	"fmt"
 	"os"
+	"runtime/debug"
 
+	"github.com/c-bata/go-prompt"
 	"github.com/gookit/gcli/v3"
+	"github.com/urionz/goofy/cmds/repl/interpreter"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/log"
 )
 
 var (
-	outWriter  = os.Stdout
-	errWriter  = os.Stderr
-	autoImport bool
-	extFiles   string
-	pkg        string
+	currentInterpreter *interpreter.Interpreter
+	suggestions        = []prompt.Suggest{
+		{
+			Text: "json.Marshal",
+		},
+	}
 )
 
 func Command(_ contracts.Application) *gcli.Command {
 	return &gcli.Command{
 		Name: "repl",
 		Desc: "交互式命令工具",
-		Config: func(c *gcli.Command) {
-			c.BoolOpt(&autoImport, "autoimport", "", true, "自动import")
-			c.StrOpt(&extFiles, "context", "", "", "import packages, functions, variables and constants from external golang source files")
-			c.StrOpt(&pkg, "pkg", "", "", "the package where the session will be run inside")
-		},
 		Func: func(c *gcli.Command, args []string) error {
-			return New(
-				AutoImport(autoImport),
-				ExtFiles(extFiles),
-				PackageName(pkg),
-				OutWriter(outWriter),
-				ErrWriter(errWriter),
-			).Run()
+			wd, err := os.Getwd()
+			if err != nil {
+				log.Panic(err)
+			}
+			currentInterpreter, err = interpreter.NewSession(wd)
+			if err != nil {
+				log.Panic(err)
+			}
+			_, err = currentInterpreter.Eval(":e 1")
+			if err != nil {
+				log.Panic(err)
+			}
+			p := prompt.New(handler, completer, prompt.OptionPrefix(">>> "))
+			p.Run()
+			return nil
 		},
 	}
+}
+
+func completer(d prompt.Document) []prompt.Suggest {
+	w := d.GetWordBeforeCursor()
+	if w == "" {
+		return []prompt.Suggest{}
+	}
+	return prompt.FilterHasPrefix(suggestions, w, true)
+}
+
+func handler(input string) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("Panic: %v\n%s", err, debug.Stack())
+		}
+	}()
+	out, err := currentInterpreter.Eval(input)
+	if err != nil {
+		fmt.Print(err.Error())
+		return
+	}
+
+	fmt.Print(out)
 }
