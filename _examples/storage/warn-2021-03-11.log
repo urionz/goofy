@@ -1,5 +1,0 @@
-2021-03-11 17:39:38	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/goofy/cmds/dlv/dlv.go:132	Could not start Delve REPL: EOF
-2021-03-11 17:55:22	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/goofy/cmds/dlv/dlv.go:139	Could not start Delve REPL: EOF
-2021-03-11 17:56:34	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/goofy/cmds/dlv/dlv.go:139	Could not start Delve REPL: EOF
-2021-03-11 17:59:57	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/goofy/cmds/dlv/dlv.go:139	Could not start Delve REPL: detached from the process
-2021-03-11 18:00:36	[31mFATAL[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/goofy/cmds/dlv/dlv.go:139	Could not start Delve REPL: EOF

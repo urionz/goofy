@@ -1,1 +1,0 @@
-2021-03-18 17:59:58	[31mERROR[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:221	Error 1050: Table 'tests' already exists

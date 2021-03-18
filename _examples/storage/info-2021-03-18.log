@@ -1,6 +1,0 @@
-2021-03-18 17:59:40	[34mINFO[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:256	Dropped all tables successfully.
-2021-03-18 17:59:40	[34mINFO[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:503	Migrating:fqqdqd
-2021-03-18 17:59:40	[34mINFO[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:512	Migrated:fqqdqd
-2021-03-18 17:59:58	[34mINFO[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:638	Rolling back:fqqdqd
-2021-03-18 17:59:58	[34mINFO[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:648	Rolled back:fqqdqd
-2021-03-18 17:59:58	[34mINFO[0m	/Users/urionz/WorkSpace/Code/docker/wwwroot/github.urionz/tgoofy/db/migrate/migrate_command.go:503	Migrating:fqqdqd
