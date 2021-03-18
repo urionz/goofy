@@ -12,6 +12,7 @@ import (
 	"github.com/urionz/goofy/cache"
 	"github.com/urionz/goofy/cmds"
 	"github.com/urionz/goofy/cmds/dlv"
+	"github.com/urionz/goofy/cmds/repl"
 	"github.com/urionz/goofy/config"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/db"
@@ -30,6 +31,7 @@ var Default = New(SetWorkspace("./")).AddServices(
 ).AddCommanders(
 	contracts.FuncCommander(dlv.Command),
 	contracts.FuncCommander(cmds.GenerateConf),
+	contracts.FuncCommander(repl.Command),
 )
 
 type Application struct {

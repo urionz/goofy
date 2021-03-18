@@ -25,7 +25,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var createStub = `package main
+var createStub = `package migrations
 
 import (
 	"github.com/urionz/goofy/db/migrate"
@@ -61,7 +61,7 @@ func (table *{{ .StructName }}) Down(db *gorm.DB) error {
 }
 `
 
-var blankStub = `package main
+var blankStub = `package migrations
 
 import (
 	"github.com/urionz/goofy/db/migrate"
