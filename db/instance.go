@@ -11,9 +11,13 @@ import (
 var instance *Manager
 
 func Model(model contracts.DBConnection) *gorm.DB {
-	return instance.Connection(model.Connection())
+	return instance.Connection(model.Connection()).Model(&model)
 }
 
 func Truncate(model schema.Tabler, db *gorm.DB) error {
 	return db.Exec(fmt.Sprintf("TRUNCATE TABLE %s", model.TableName())).Error
+}
+
+func Default() *gorm.DB {
+	return instance.Connection()
 }
