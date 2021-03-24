@@ -13,15 +13,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-const (
-	DebugLevel = "debug"
-	InfoLevel  = "info"
-	WarnLevel  = "warn"
-	ErrorLevel = "error"
-	PanicLevel = "panic"
-	FatalLevel = "fatal"
-)
-
 type Logger struct {
 	di.Tags `name:"logger"`
 
@@ -141,17 +132,17 @@ func (logger *Logger) getLevelWriter(filename string) io.Writer {
 
 func (*Logger) parseLogLevel(level string) zapcore.Level {
 	switch level {
-	case DebugLevel:
+	case contracts.DebugLevel:
 		return zap.DebugLevel
-	case ErrorLevel:
+	case contracts.ErrorLevel:
 		return zap.ErrorLevel
-	case InfoLevel:
+	case contracts.InfoLevel:
 		return zap.InfoLevel
-	case WarnLevel:
+	case contracts.WarnLevel:
 		return zap.WarnLevel
-	case PanicLevel:
+	case contracts.PanicLevel:
 		return zap.PanicLevel
-	case FatalLevel:
+	case contracts.FatalLevel:
 		return zap.FatalLevel
 	}
 	return zap.InfoLevel

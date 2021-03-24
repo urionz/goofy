@@ -76,8 +76,8 @@ func (m *Manager) resolve(name string) (conn *gorm.DB, err error) {
 			log.New(io.MultiWriter(writes...), "\r\n", log.LstdFlags),
 			logger.Config{
 				SlowThreshold: time.Duration(conf.Int("slow_threshold", 100)) * time.Millisecond,
-				LogLevel:      logger.Error,
-				Colorful:      true,
+				LogLevel:      m.parseLogLevel(conf.String("log_level", m.conf.String("database.log_level", m.conf.String("logger.level", "debug")))),
+				Colorful:      conf.Bool("log_color", m.conf.Bool("database.log_color", m.conf.Bool("logger.color", true))),
 			},
 		),
 	}); err != nil {
@@ -99,4 +99,22 @@ func (m *Manager) getDefaultConnection() string {
 
 func (m *Manager) getConfig(name string) contracts.Config {
 	return m.conf.Object(fmt.Sprintf("database.conns.%s", name))
+}
+
+func (m *Manager) parseLogLevel(level string) logger.LogLevel {
+	switch level {
+	case contracts.DebugLevel:
+		return logger.Info
+	case contracts.ErrorLevel:
+		return logger.Error
+	case contracts.InfoLevel:
+		return logger.Info
+	case contracts.WarnLevel:
+		return logger.Warn
+	case contracts.PanicLevel:
+		return logger.Error
+	case contracts.FatalLevel:
+		return logger.Error
+	}
+	return logger.Info
 }

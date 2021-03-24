@@ -4,6 +4,15 @@ import (
 	"github.com/goava/di"
 )
 
+const (
+	DebugLevel = "debug"
+	InfoLevel  = "info"
+	WarnLevel  = "warn"
+	ErrorLevel = "error"
+	PanicLevel = "panic"
+	FatalLevel = "fatal"
+)
+
 type Application interface {
 	AddSchedules(scheduleJob ScheduleJob) Application
 	AddServices(services ...interface{}) Application
