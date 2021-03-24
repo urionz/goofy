@@ -175,11 +175,6 @@ func Rollback(app contracts.Application) *gcli.Command {
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
 		Func: func(c *gcli.Command, args []string) error {
-			var manager contracts.DBFactory
-			if err := app.Resolve(&manager); err != nil {
-				return err
-			}
-
 			if err := SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
 				return err
