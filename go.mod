@@ -13,6 +13,8 @@ require (
 	github.com/gookit/color v1.3.8
 	github.com/gookit/event v1.0.4
 	github.com/gookit/gcli/v3 v3.0.0-20210317033206-b4ab755d7375
+	github.com/gookit/goutil v0.3.10
+	github.com/iris-contrib/schema v0.0.6
 	github.com/jedib0t/go-pretty/v6 v6.1.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/kataras/iris/v12 v12.2.0-alpha2.0.20210219075829-bfbed2f84174
