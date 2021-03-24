@@ -35,16 +35,19 @@ func NewManager(conf contracts.Config) *Manager {
 func (m *Manager) Connection(names ...string) *gorm.DB {
 	var conn *gorm.DB
 	var err error
-	if len(names) == 0 || names[0] == "" {
-		names = append(names, m.getDefaultConnection())
+
+	driver := m.getDefaultConnection()
+	if len(names) > 0 && names[0] != "" {
+		driver = names[0]
 	}
-	if conn, ok := m.connections.Load(names[0]); ok {
+
+	if conn, ok := m.connections.Load(driver); ok {
 		return conn.(*gorm.DB)
 	}
-	if conn, err = m.resolve(names[0]); err != nil {
+	if conn, err = m.resolve(driver); err != nil {
 		return nil
 	}
-	m.connections.Store(names[0], conn)
+	m.connections.Store(driver, conn)
 	return conn
 }
 

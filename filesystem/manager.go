@@ -32,11 +32,12 @@ func NewManager(conf contracts.Config) *Manager {
 	}
 }
 
-func (m *Manager) Disk(name ...string) contracts.Filesystem {
-	if len(name) == 0 {
-		name = append(name, m.getDefaultDriver())
+func (m *Manager) Disk(names ...string) contracts.Filesystem {
+	driver := m.getDefaultDriver()
+	if len(names) > 0 && names[0] != "" {
+		driver = names[0]
 	}
-	return m.get(name[0])
+	return m.get(driver)
 }
 
 func (m *Manager) get(name string) contracts.Filesystem {

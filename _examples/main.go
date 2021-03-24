@@ -6,6 +6,7 @@ import (
 
 	"github.com/kataras/iris/v12"
 	"github.com/urionz/goofy"
+
 	_ "github.com/urionz/goofy/_examples/database/migrations"
 	"github.com/urionz/goofy/cache"
 )

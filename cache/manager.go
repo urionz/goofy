@@ -34,19 +34,22 @@ func NewManager(app contracts.Application, conf contracts.Config) *Manager {
 }
 
 // Get a cache store instance by name, wrapped in a repository.
-func (m *Manager) Store(name ...string) contracts.CacheRepository {
+func (m *Manager) Store(names ...string) contracts.CacheRepository {
 	var store contracts.CacheRepository
 	var err error
-	if len(name) == 0 {
-		name = append(name, m.getDefaultDriver())
+
+	driver := m.getDefaultDriver()
+	if len(names) > 0 && names[0] != "" {
+		driver = names[0]
 	}
-	if store, ok := m.stores.Load(name[0]); ok {
+
+	if store, ok := m.stores.Load(driver); ok {
 		return store.(contracts.CacheRepository)
 	}
-	if store, err = m.resolve(name[0]); err != nil {
+	if store, err = m.resolve(driver); err != nil {
 		return nil
 	}
-	m.stores.Store(name[0], store)
+	m.stores.Store(driver, store)
 	return store
 }
 

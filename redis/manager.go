@@ -32,16 +32,19 @@ func NewRedisManager(app contracts.Application, conf contracts.Config) *Manager 
 func (m *Manager) Connection(names ...string) (contracts.RedisConnection, error) {
 	var err error
 	var conn *Connection
-	if len(names) == 0 || names[0] == "" {
-		names = append(names, m.getDefaultConnection())
+
+	driver := m.getDefaultConnection()
+	if len(names) > 0 && names[0] != "" {
+		driver = names[0]
 	}
-	if conn, ok := m.connections.Load(names[0]); ok {
+
+	if conn, ok := m.connections.Load(driver); ok {
 		return conn.(*Connection), nil
 	}
-	if conn, err = m.configure(m.getConfig(names[0]), names[0]); err != nil {
+	if conn, err = m.configure(m.getConfig(driver), driver); err != nil {
 		return nil, err
 	}
-	m.connections.Store(names[0], conn)
+	m.connections.Store(driver, conn)
 
 	return conn, nil
 }

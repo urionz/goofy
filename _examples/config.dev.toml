@@ -35,7 +35,7 @@ default = "test"
 	# 端口
 	port = 3306
 	# 数据库名称
-	name = "test"
+	name = "movies"
 	# 字符集
 	charset = "utf8mb4"
 	# 前缀

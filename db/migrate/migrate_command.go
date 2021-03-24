@@ -3,6 +3,7 @@ package migrate
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"os"
 	"path"
@@ -131,6 +132,8 @@ func SwitchDBConnection(app contracts.Application) error {
 			survey.AskOne(prompt, conn)
 		}
 	}
+
+	fmt.Println("driver ====", driver)
 
 	conn = manager.Connection(driver)
 
