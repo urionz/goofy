@@ -10,7 +10,6 @@ import (
 	"github.com/gookit/gcli/v3"
 	"github.com/robfig/cron/v3"
 	"github.com/urionz/goofy/cache"
-	"github.com/urionz/goofy/cmds"
 	"github.com/urionz/goofy/cmds/dlv"
 	"github.com/urionz/goofy/cmds/repl"
 	"github.com/urionz/goofy/config"
@@ -30,7 +29,6 @@ var Default = New(SetWorkspace("./")).AddServices(
 	validator.NewServiceProvider, web.NewServiceProvider,
 ).AddCommanders(
 	contracts.FuncCommander(dlv.Command),
-	contracts.FuncCommander(cmds.GenerateConf),
 	contracts.FuncCommander(repl.Command),
 )
 

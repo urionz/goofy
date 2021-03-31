@@ -11,6 +11,15 @@ import (
 	"github.com/urionz/goofy/contracts"
 )
 
+func init() {
+	contracts.AddConfTpl(`
+# http相关配置
+[http]
+# web监听端口
+port = 4000
+`)
+}
+
 func NewServiceProvider(app contracts.Application) error {
 	webEngine := iris.New()
 	app.AddCommanders(&engine{

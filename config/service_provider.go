@@ -34,5 +34,7 @@ func NewServiceProvider(app contracts.Application) error {
 		return err
 	}
 
+	app.AddCommanders(contracts.FuncCommander(Command))
+
 	return app.ProvideValue(serve, di.As(new(contracts.Config)), di.Tags{"name": "config"})
 }

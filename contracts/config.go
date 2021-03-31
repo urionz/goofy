@@ -16,3 +16,21 @@ type Config interface {
 	Object(key string, findByPath ...bool) Config
 	Data() map[string]interface{}
 }
+
+var (
+	tpl = `# 应用相关配置
+[app]
+# 应用名称
+name = "app_name"
+# 是否开启调试模式
+debug = false`
+)
+
+func AddConfTpl(confTpl string) {
+	tpl += `
+` + confTpl
+}
+
+func GetConfTpl() string {
+	return tpl
+}
