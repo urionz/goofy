@@ -6,8 +6,14 @@ import (
 )
 
 func InjectWebContext(ctx iris.Context) {
-	ctx.RegisterDependency([]interface{}{
-		web.NewContext(ctx),
+	depends := []interface{}{
+		&web.Context{
+			Context: ctx,
+		},
 		&web.Validation{},
-	})
+	}
+
+	for _, dep := range depends {
+		ctx.RegisterDependency(dep)
+	}
 }

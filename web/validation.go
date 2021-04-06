@@ -12,6 +12,17 @@ type IValidation interface {
 	Messages(ctx *Context) validator.MapData
 }
 
+type BaseValidator struct {
+}
+
+func (*BaseValidator) Rules(_ *Context) validator.MapData {
+	return nil
+}
+
+func (*BaseValidator) Messages(_ *Context) validator.MapData {
+	return nil
+}
+
 type Validation struct {
 }
 

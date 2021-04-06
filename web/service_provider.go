@@ -9,6 +9,7 @@ import (
 	"github.com/goava/di"
 	"github.com/gookit/gcli/v3"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/logger"
 	irisRecover "github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/middleware/requestid"
 	"github.com/urionz/goofy/contracts"
@@ -25,6 +26,7 @@ port = 4000
 
 func NewServiceProvider(app contracts.Application) error {
 	webEngine := iris.New()
+	webEngine.Use(requestid.New(), irisRecover.New(), logger.New())
 	app.AddCommanders(&engine{
 		Application: webEngine,
 	})
@@ -59,7 +61,6 @@ func (cmd *engine) Handle(app contracts.Application) *gcli.Command {
 				cmd.Logger().SetLevel("debug")
 				cmd.Logger().SetOutput(os.Stdout)
 			}
-			cmd.Use(requestid.New(), irisRecover.New())
 			return cmd.Listen(
 				addr, iris.WithOptimizations,
 				iris.WithRemoteAddrPrivateSubnet("192.168.0.0", "192.168.255.255"),
