@@ -3,11 +3,14 @@ package web
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 
 	"github.com/goava/di"
 	"github.com/gookit/gcli/v3"
 	"github.com/kataras/iris/v12"
+	irisRecover "github.com/kataras/iris/v12/middleware/recover"
+	"github.com/kataras/iris/v12/middleware/requestid"
 	"github.com/urionz/goofy/contracts"
 )
 
@@ -54,7 +57,9 @@ func (cmd *engine) Handle(app contracts.Application) *gcli.Command {
 			cmd.SetName(cmd.name)
 			if cmd.debug {
 				cmd.Logger().SetLevel("debug")
+				cmd.Logger().SetOutput(os.Stdout)
 			}
+			cmd.Use(requestid.New(), irisRecover.New())
 			return cmd.Listen(
 				addr, iris.WithOptimizations,
 				iris.WithRemoteAddrPrivateSubnet("192.168.0.0", "192.168.255.255"),
