@@ -25,3 +25,28 @@ func Default() *gorm.DB {
 func M() *Manager {
 	return instance
 }
+
+func Tx(txFunc func(tx *gorm.DB) error, connections ...*gorm.DB) (err error) {
+	conn := Default()
+	if len(connections) > 0 && connections[0] != nil {
+		conn = connections[0]
+	}
+	tx := conn.Begin()
+	if tx.Error != nil {
+		return tx.Error
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		} else if err != nil {
+			tx.Rollback()
+		} else {
+			err = tx.Commit().Error
+		}
+	}()
+
+	err = txFunc(tx)
+
+	return err
+}
