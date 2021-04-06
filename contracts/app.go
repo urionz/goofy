@@ -27,6 +27,7 @@ type Application interface {
 	Call(args ...string) int
 
 	Workspace() string
+	Dir() string
 	Storage() string
 	Database() string
 	Run() Application

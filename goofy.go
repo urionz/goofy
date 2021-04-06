@@ -3,7 +3,9 @@ package goofy
 import (
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
+	"runtime"
 
 	"github.com/goava/di"
 	"github.com/gookit/event"
@@ -85,6 +87,11 @@ func (app *Application) addError(err error) {
 
 func (app *Application) Workspace() string {
 	return app.workspace
+}
+
+func (app *Application) Dir() string {
+	_, file, _, _ := runtime.Caller(1)
+	return filepath.Dir(file)
 }
 
 func (app *Application) Run() contracts.Application {

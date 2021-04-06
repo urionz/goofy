@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/urionz/config"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goutil"
 	"github.com/urionz/ini/dotenv"
 )
 
@@ -63,8 +64,12 @@ func String(key string, defVal ...string) string {
 	return serve.String(key, defVal...)
 }
 
-func Strings(key string) []string {
-	return serve.Strings(key)
+func Strings(key string, defVal ...string) goutil.Strings {
+	val := serve.Strings(key)
+	if len(val) == 0 && len(defVal) > 0 {
+		return defVal
+	}
+	return val
 }
 
 func Int(key string, defVal ...int) int {

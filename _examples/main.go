@@ -6,13 +6,14 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
 	_ "github.com/urionz/goofy/_examples/database/migrations"
+	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/middleware"
 )
 
 func main() {
 	goofy.Default.AddServices(
-		func(engine *iris.Application) {
+		func(engine *iris.Application, app contracts.Application) {
 			c := engine.ConfigureContainer()
 			c.Use(middleware.InjectWebContext)
 			c.PartyFunc("/api", func(route *router.APIContainer) {
