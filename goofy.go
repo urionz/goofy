@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/goava/di"
 	"github.com/gookit/event"
@@ -98,7 +99,9 @@ func (app *Application) Run() contracts.Application {
 	if err := app.Container.Invoke(app.bootstrap); err != nil {
 		panic(err)
 	}
-	app.App.Run(nil)
+	if len(os.Args) > 0 && !strings.HasSuffix(os.Args[0], "test") {
+		app.App.Run(nil)
+	}
 	return app
 }
 
@@ -136,6 +139,10 @@ func (app *Application) resolveInputsFromDI(service interface{}) ([]reflect.Valu
 		}
 		inputs[i] = newValue.Elem()
 	}
-	app.App.GlobalFlags().Parse(os.Args[1:])
+
+	if len(os.Args) > 0 && !strings.HasSuffix(os.Args[0], "test") {
+		app.App.GlobalFlags().Parse(os.Args[1:])
+	}
+
 	return valueOf.Call(inputs), nil
 }

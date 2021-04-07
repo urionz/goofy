@@ -83,3 +83,33 @@ func (repo *Repository) Forever(key string, value interface{}) error {
 func (repo *Repository) Forget(key string) error {
 	return repo.store.Forget(repo.store.ItemKey(key))
 }
+
+func (repo *Repository) Remember(key string, ttl time.Duration, callback contracts.CacheClosure) interface{} {
+	value := repo.Get(key)
+	if value != nil {
+		return value
+	}
+	value = callback()
+	if err := repo.Put(key, value, ttl); err != nil {
+		panic(err)
+		return nil
+	}
+	return value
+}
+
+func (repo *Repository) Sear(key string, callback contracts.CacheClosure) interface{} {
+	return repo.RememberForever(key, callback)
+}
+
+func (repo *Repository) RememberForever(key string, callback contracts.CacheClosure) interface{} {
+	value := repo.Get(key)
+	if value != nil {
+		return value
+	}
+	value = callback()
+	if err := repo.Forever(key, value); err != nil {
+		panic(err)
+		return nil
+	}
+	return value
+}
