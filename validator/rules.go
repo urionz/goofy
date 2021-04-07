@@ -1095,7 +1095,8 @@ func init() {
 		if goutil.Contains(anotherValue, mustEquals) && value == nil {
 			err = fmt.Errorf("the %s field is empty", field)
 		}
-		if err != nil && message != "" {
+		
+		if message != "" {
 			err = errors.New(message)
 		}
 
@@ -1201,7 +1202,7 @@ func init() {
 		}
 
 
-		return err
+		return nil
 	})
 
 	AddCustomRule("required_with", func(dataFace DataFace, field string, rule string, message string, value interface{}) error {
@@ -1214,7 +1215,8 @@ func init() {
 				break
 			}
 		}
-		if err != nil && message != "" {
+
+		if message != "" {
 			err = errors.New(message)
 		}
 
@@ -1320,7 +1322,7 @@ func init() {
 		}
 
 
-		return err
+		return nil
 	})
 
 	AddCustomRule("cn_mobile", func(dataFace DataFace, field string, rule string, message string, value interface{}) error {
