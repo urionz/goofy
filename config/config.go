@@ -38,6 +38,14 @@ func (c *Configure) Object(key string, findByPath ...bool) contracts.Config {
 	}
 }
 
+func (c *Configure) Strings(key string, defVal ...string) goutil.Strings {
+	val := serve.Config.Strings(key)
+	if len(val) == 0 && len(defVal) > 0 {
+		return defVal
+	}
+	return val
+}
+
 var serve *Configure
 
 func LoadExists(files ...string) error {
@@ -65,11 +73,7 @@ func String(key string, defVal ...string) string {
 }
 
 func Strings(key string, defVal ...string) goutil.Strings {
-	val := serve.Strings(key)
-	if len(val) == 0 && len(defVal) > 0 {
-		return defVal
-	}
-	return val
+	return serve.Strings(key, defVal...)
 }
 
 func Int(key string, defVal ...int) int {
