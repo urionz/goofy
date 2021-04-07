@@ -1091,11 +1091,19 @@ func init() {
 		anotherValue, has := dataFace.Get(anotherField)
 		if !has {
 			err = fmt.Errorf("the %s field is empty", anotherField)
+			if message != "" {
+				return errors.New(message)
+			}
+			return err
 		}
 		if goutil.Contains(anotherValue, mustEquals) && value == nil {
 			err = fmt.Errorf("the %s field is empty", field)
+			if message != "" {
+				return errors.New(message)
+			}
+			return err
 		}
-		
+
 		if message != "" {
 			err = errors.New(message)
 		}
@@ -1207,19 +1215,22 @@ func init() {
 
 	AddCustomRule("required_with", func(dataFace DataFace, field string, rule string, message string, value interface{}) error {
 		var err error
+		var anotherError error
 		anotherFields := strings.Split(strings.TrimPrefix(rule, "required_with:"), ",")
 		for _, anotherField := range anotherFields {
 			_, has := dataFace.Get(anotherField)
 			if has && value == nil {
-				err = fmt.Errorf("the %s field is empty", field)
-				break
+				anotherError = fmt.Errorf("the %s field is empty", field)
+				if message != "" {
+					return errors.New(message)
+				}
+				return anotherError
 			}
 		}
 
 		if message != "" {
 			err = errors.New(message)
 		}
-
 
 		rv := reflect.ValueOf(value)
 		switch rv.Kind() {
