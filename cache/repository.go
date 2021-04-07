@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang-module/carbon"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goutil/jsonutil"
 	"github.com/urionz/goutil/refutil"
 )
 
@@ -23,7 +24,7 @@ func NewRepository(store contracts.Store) *Repository {
 	}
 }
 
-func (repo *Repository) Get(key string, defVal ...interface{}) interface{} {
+func (repo *Repository) Scan(key string, ptr interface{}, defVal ...interface{}) error {
 	value := repo.store.Get(key)
 	if len(defVal) > 0 && (value == nil || refutil.IsBlank(value)) {
 		if closure, ok := defVal[0].(contracts.CacheClosure); ok {
@@ -32,7 +33,17 @@ func (repo *Repository) Get(key string, defVal ...interface{}) interface{} {
 			value = defVal[0]
 		}
 	}
-	return value
+	if value == nil {
+		return fmt.Errorf("the key %s is not found", key)
+	}
+	b, err := jsonutil.Encode(value)
+	if err != nil {
+		return err
+	}
+	if err := jsonutil.Decode(b, ptr); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (repo *Repository) Set(key string, value interface{}, ttl time.Duration) error {
@@ -84,32 +95,48 @@ func (repo *Repository) Forget(key string) error {
 	return repo.store.Forget(repo.store.ItemKey(key))
 }
 
-func (repo *Repository) Remember(key string, ttl time.Duration, callback contracts.CacheClosure) interface{} {
-	value := repo.Get(key)
-	if value != nil {
-		return value
+func (repo *Repository) Remember(key string, ttl time.Duration, callback contracts.CacheClosure, ptr interface{}, force ...bool) error {
+	if len(force) <= 0 || !force[0] {
+		if err := repo.Scan(key, ptr); err == nil {
+			return nil
+		}
 	}
-	value = callback()
-	if err := repo.Put(key, value, ttl); err != nil {
-		panic(err)
-		return nil
+	value := callback()
+	b, err := jsonutil.Encode(value)
+	if err != nil {
+		return err
 	}
-	return value
+	if err := jsonutil.Decode(b, ptr); err != nil {
+		return err
+	}
+	if err := repo.Put(key, ptr, ttl); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (repo *Repository) Sear(key string, callback contracts.CacheClosure) interface{} {
-	return repo.RememberForever(key, callback)
+func (repo *Repository) Sear(key string, callback contracts.CacheClosure, ptr interface{}, force ...bool) error {
+	return repo.RememberForever(key, callback, ptr, force...)
 }
 
-func (repo *Repository) RememberForever(key string, callback contracts.CacheClosure) interface{} {
-	value := repo.Get(key)
-	if value != nil {
-		return value
+func (repo *Repository) RememberForever(key string, callback contracts.CacheClosure, ptr interface{}, force ...bool) error {
+	if len(force) <= 0 || !force[0] {
+		if err := repo.Scan(key, ptr); err == nil {
+			return nil
+		}
 	}
-	value = callback()
-	if err := repo.Forever(key, value); err != nil {
-		panic(err)
-		return nil
+
+	value := callback()
+	b, err := jsonutil.Encode(value)
+	if err != nil {
+		return err
 	}
-	return value
+	if err := jsonutil.Decode(b, ptr); err != nil {
+		return err
+	}
+	if err := repo.Forever(key, ptr); err != nil {
+		return err
+	}
+
+	return nil
 }

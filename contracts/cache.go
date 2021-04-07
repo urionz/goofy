@@ -3,7 +3,7 @@ package contracts
 import "time"
 
 type Cache interface {
-	Get(key string, defVal ...interface{}) interface{}
+	Scan(key string, ptr interface{}, defVal ...interface{}) error
 	Set(key string, value interface{}, ttl time.Duration) error
 	Delete(key string) error
 	Clear() error
@@ -38,9 +38,9 @@ type CacheRepository interface {
 	Increment(key string, value ...int) error
 	Decrement(key string, value ...int) error
 	Forever(key string, value interface{}) error
-	Remember(key string, ttl time.Duration, closure CacheClosure) interface{}
-	Sear(key string, closure CacheClosure) interface{}
-	RememberForever(key string, closure CacheClosure) interface{}
+	Remember(key string, ttl time.Duration, closure CacheClosure, ptr interface{}, force ...bool) error
+	Sear(key string, closure CacheClosure, ptr interface{}, force ...bool) error
+	RememberForever(key string, closure CacheClosure, ptr interface{}, force ...bool) error
 	Forget(key string) error
 	GetStore() Cache
 }

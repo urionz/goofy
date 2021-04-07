@@ -28,8 +28,8 @@ func NewRedisTaggedCache(store *RedisStore, tags *TagSet) *RedisTaggedCache {
 	return r
 }
 
-func (r *RedisTaggedCache) Get(key string, defVal ...interface{}) interface{} {
-	return r.TaggedCache.Get(r.ItemKey(key), defVal...)
+func (r *RedisTaggedCache) Scan(key string, ptr interface{}, defVal ...interface{}) error {
+	return r.TaggedCache.Scan(r.ItemKey(key), ptr, defVal...)
 }
 
 func (r *RedisTaggedCache) Set(key string, value interface{}, ttl time.Duration) error {

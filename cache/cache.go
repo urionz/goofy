@@ -9,7 +9,7 @@ import (
 type BaseCache struct {
 }
 
-func (*BaseCache) Get(_ string, _ ...interface{}) interface{} {
+func (*BaseCache) Scan(_ string, ptr interface{}, _ ...interface{}) error {
 	return nil
 }
 func (*BaseCache) Set(_ string, _ interface{}, _ time.Duration) error {
@@ -93,13 +93,13 @@ func (*BaseRepository) Decrement(_ string, _ ...int) error {
 func (*BaseRepository) Forever(_ string, _ interface{}) error {
 	return nil
 }
-func (*BaseRepository) Remember(_ string, _ time.Duration, _ contracts.CacheClosure) interface{} {
+func (*BaseRepository) Remember(_ string, _ time.Duration, _ contracts.CacheClosure, _ interface{}) error {
 	return nil
 }
-func (*BaseRepository) Sear(_ string, _ contracts.CacheClosure) interface{} {
+func (*BaseRepository) Sear(_ string, _ contracts.CacheClosure, _ interface{}) error {
 	return nil
 }
-func (*BaseRepository) RememberForever(_ string, _ contracts.CacheClosure) interface{} {
+func (*BaseRepository) RememberForever(_ string, _ contracts.CacheClosure, _ interface{}) error {
 	return nil
 }
 func (*BaseRepository) Forget(_ string) error {
