@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"path"
 	"sync"
 
 	"github.com/goava/di"
@@ -18,17 +19,19 @@ const (
 type Manager struct {
 	di.Tags `name:"cache"`
 
-	app    contracts.Application
-	conf   contracts.Config
-	stores sync.Map
+	storagePath string
+	app         contracts.Application
+	conf        contracts.Config
+	stores      sync.Map
 }
 
 var _ contracts.CacheFactory = new(Manager)
 
 func NewManager(app contracts.Application, conf contracts.Config) *Manager {
 	manager := &Manager{
-		app:  app,
-		conf: conf,
+		app:         app,
+		conf:        conf,
+		storagePath: app.Storage(),
 	}
 	return manager
 }
@@ -82,7 +85,7 @@ func (m *Manager) createFileDriver(conf contracts.Config) *Repository {
 	if err := m.app.Resolve(&files); err != nil {
 		return nil
 	}
-	return m.repository(NewFileStore(files, conf.String("path", "./")))
+	return m.repository(NewFileStore(files, path.Join(m.storagePath, conf.String("path", "./"))))
 }
 
 // Create an instance of the Redis cache driver.
