@@ -28,7 +28,7 @@ func NewServiceProvider(app contracts.Application) error {
 	webEngine := iris.New()
 	webEngine.Use(requestid.New(), irisRecover.New(), logger.New())
 	app.AddCommanders(&engine{
-		Engine: webEngine,
+		Application: webEngine,
 	})
 	return app.ProvideValue(webEngine, container.Tags{"name": "web"})
 }
@@ -37,7 +37,7 @@ type engine struct {
 	name  string
 	debug bool
 	port  int
-	*Engine
+	*iris.Application
 }
 
 func (e *engine) Handle(app contracts.Application) *command.Command {
