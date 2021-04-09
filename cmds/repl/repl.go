@@ -7,8 +7,8 @@ import (
 	"runtime/debug"
 
 	"github.com/c-bata/go-prompt"
-	"github.com/gookit/gcli/v3"
 	"github.com/urionz/goofy/cmds/repl/interpreter"
+	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/log"
 )
@@ -22,11 +22,11 @@ var (
 	}
 )
 
-func Command(_ contracts.Application) *gcli.Command {
-	return &gcli.Command{
+func Command(_ contracts.Application) *command.Command {
+	return &command.Command{
 		Name: "repl",
 		Desc: "交互式命令工具",
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			wd, err := os.Getwd()
 			if err != nil {
 				log.Panic(err)

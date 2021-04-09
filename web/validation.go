@@ -5,21 +5,22 @@ import (
 
 	"github.com/urionz/goofy/errors"
 	"github.com/urionz/goofy/validator"
+	"github.com/urionz/goofy/web/context"
 )
 
 type IValidation interface {
-	Rules(ctx *Context) validator.MapData
-	Messages(ctx *Context) validator.MapData
+	Rules(ctx *context.Context) validator.MapData
+	Messages(ctx *context.Context) validator.MapData
 }
 
 type BaseValidator struct {
 }
 
-func (*BaseValidator) Rules(_ *Context) validator.MapData {
+func (*BaseValidator) Rules(_ *context.Context) validator.MapData {
 	return nil
 }
 
-func (*BaseValidator) Messages(_ *Context) validator.MapData {
+func (*BaseValidator) Messages(_ *context.Context) validator.MapData {
 	return nil
 }
 
@@ -29,7 +30,7 @@ type Validation struct {
 type ValidationOption struct {
 }
 
-func validate(bindingFunc func(rdp IValidation) error, ctx *Context, reqDataPtr IValidation, maxMemoryLimit ...int64) *errors.CodeError {
+func validate(bindingFunc func(rdp IValidation) error, ctx *context.Context, reqDataPtr IValidation, maxMemoryLimit ...int64) *errors.CodeError {
 	ctx.RecordRequestBody(true)
 	_ = bindingFunc(reqDataPtr)
 	ctx.RecordRequestBody(false)
@@ -51,7 +52,7 @@ func validate(bindingFunc func(rdp IValidation) error, ctx *Context, reqDataPtr 
 	return nil
 }
 
-func (v *Validation) Validate(ctx *Context, reqDataPtr IValidation, maxMemoryLimit ...int64) *errors.CodeError {
+func (v *Validation) Validate(ctx *context.Context, reqDataPtr IValidation, maxMemoryLimit ...int64) *errors.CodeError {
 	return validate(func(rdp IValidation) error {
 		_ = ctx.ReadParams(reqDataPtr)
 		_ = ctx.ReadQuery(reqDataPtr)

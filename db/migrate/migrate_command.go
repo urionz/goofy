@@ -14,9 +14,9 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/golang-module/carbon"
 	"github.com/gookit/color"
-	"github.com/gookit/gcli/v3"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/urionz/collection"
+	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goutil/fsutil"
 	"github.com/urionz/goutil/strutil"
@@ -139,15 +139,15 @@ func SwitchDBConnection(app contracts.Application) error {
 	return nil
 }
 
-func Migrate(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Migrate(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "migrate",
 		Desc: "运行迁移",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.StrOpt(&driver, "conn", "", "", "指定数据库连接")
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 
 			if err := SwitchDBConnection(app); err != nil {
 				color.Warnln(err)
@@ -163,18 +163,18 @@ func Migrate(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
-func Rollback(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Rollback(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name:     "migrate-rollback",
 		Category: "migrate",
 		Desc:     "迁移回滚",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			if err := SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
 				return nil
@@ -188,17 +188,17 @@ func Rollback(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
-func Refresh(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Refresh(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "migrate-refresh",
 		Desc: "刷新迁移",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			var err error
 			if err = SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
@@ -224,17 +224,17 @@ func Refresh(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
-func Fresh(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Fresh(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "migrate-fresh",
 		Desc: "migrate fresh",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			var err error
 			var tables []string
 
@@ -265,14 +265,14 @@ func Fresh(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
-func Status(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Status(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "migrate-status",
 		Desc: "查看迁移状态",
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			var batches map[string]int
 			var ran []*Model
 			var err error
@@ -320,14 +320,14 @@ func Status(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
-func Reset(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Reset(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "migrate-reset",
 		Desc: "重置迁移",
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			if err := SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
 				return nil
@@ -340,7 +340,7 @@ func Reset(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
 type MakeCommand struct {
@@ -348,16 +348,16 @@ type MakeCommand struct {
 	create string
 }
 
-func Make(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Make(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name:     "make-migration",
 		Category: "make",
 		Desc:     "创建迁移文件",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.StrOpt(&tableName, "table", "t", "", "The table to migrate")
 			c.StrOpt(&create, "create", "c", "", "The table to be created")
 		},
-		Func: func(c *gcli.Command, args []string) error {
+		Func: func(c *command.Command, args []string) error {
 			var prompt *survey.Input
 			var name string
 			var isCreate bool
@@ -403,7 +403,7 @@ func Make(app contracts.Application) *gcli.Command {
 		},
 	}
 
-	return command
+	return cmd
 }
 
 func getStub(isCreate bool) string {

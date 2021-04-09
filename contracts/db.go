@@ -6,7 +6,7 @@ import (
 )
 
 type DBFactory interface {
-	Connection(...string) DB
+	Connection(...string) *gorm.DB
 }
 
 type DBConnection interface {
@@ -16,12 +16,12 @@ type DBConnection interface {
 type MigrateFile interface {
 	MigrateTimestamp() int
 	TableName() string
-	Up(db DB) error
-	Down(db DB) error
+	Up(db *gorm.DB) error
+	Down(db *gorm.DB) error
 }
 
 type DBSeeder interface {
-	Handle(db DB) error
+	Handle(db *gorm.DB) error
 }
 
 type SqlCondition interface {

@@ -14,7 +14,7 @@ import (
 	"github.com/go-delve/delve/service/debugger"
 	"github.com/go-delve/delve/service/rpc2"
 	"github.com/go-delve/delve/service/rpccommon"
-	"github.com/gookit/gcli/v3"
+	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/log"
 	"github.com/urionz/goofy/utils"
@@ -27,17 +27,17 @@ var (
 	args        string
 )
 
-func Command(app contracts.Application) *gcli.Command {
-	cmd := &gcli.Command{
+func Command(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "dlv",
 		Desc: "使用delve工具开启调试模式",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.StrOpt(&packageName, "package", "", "", "The package to debug (Must have a main package)")
 			c.BoolOpt(&verbose, "verbose", "v", false, "Enable verbose mode")
 			c.IntOpt(&port, "port", "p", 8181, "Port to listen to for clients")
 			c.StrOpt(&args, "args", "", "", "Port to listen to for clients")
 		},
-		Func: func(cmd *gcli.Command, args []string) error {
+		Func: func(cmd *command.Command, args []string) error {
 			var conf contracts.Config
 			if err := app.Resolve(&conf); err != nil {
 				return err

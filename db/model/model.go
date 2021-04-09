@@ -9,14 +9,13 @@ import (
 	"time"
 
 	"github.com/urionz/goofy/contracts"
-	"gorm.io/gorm"
 )
 
 type BaseModel struct {
-	Id        uint           `gorm:"PRIMARY_KEY;AUTO_INCREMENT" json:"id"`
-	CreatedAt FmtTime        `json:"created_at"`
-	UpdatedAt FmtTime        `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	Id        uint      `gorm:"PRIMARY_KEY;AUTO_INCREMENT" json:"id"`
+	CreatedAt FmtTime   `json:"created_at"`
+	UpdatedAt FmtTime   `json:"updated_at"`
+	DeletedAt DeletedAt `gorm:"index" json:"-"`
 }
 
 var _ contracts.DBConnection = (*BaseModel)(nil)

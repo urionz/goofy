@@ -8,6 +8,7 @@ import (
 	_ "github.com/urionz/goofy/_examples/database/migrations"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/web"
+	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/middleware"
 )
 
@@ -32,7 +33,7 @@ type Req struct {
 	web.BaseValidator
 }
 
-func (*Test) Get(ctx *web.Context, validate *web.Validation) {
+func (*Test) Get(ctx *context.Context, validate *web.Validation) {
 	var r Req
 	validate.Validate(ctx, &r)
 }

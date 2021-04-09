@@ -4,7 +4,7 @@ import (
 	"path"
 	"runtime"
 
-	"github.com/goava/di"
+	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
 )
 
@@ -42,7 +42,7 @@ func NewServiceProvider(app contracts.Application, conf contracts.Config) error 
 		return err
 	}
 	instance = NewManager(app, conf)
-	if err := app.ProvideValue(instance, di.As(new(contracts.CacheFactory))); err != nil {
+	if err := app.ProvideValue(instance, container.As(new(contracts.CacheFactory))); err != nil {
 		return err
 	}
 	return nil

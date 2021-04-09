@@ -6,13 +6,12 @@ import (
 	"os"
 	"path"
 
-	"github.com/goava/di"
-	"github.com/gookit/gcli/v3"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/middleware/logger"
 	irisRecover "github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/middleware/requestid"
+	"github.com/urionz/goofy/command"
+	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
 )
 
@@ -29,50 +28,47 @@ func NewServiceProvider(app contracts.Application) error {
 	webEngine := iris.New()
 	webEngine.Use(requestid.New(), irisRecover.New(), logger.New())
 	app.AddCommanders(&engine{
-		Application: webEngine,
+		Engine: webEngine,
 	})
-	webEngine.PartyFunc("", func(p router.Party) {
-
-	})
-	return app.ProvideValue(webEngine, di.Tags{"name": "web"})
+	return app.ProvideValue(webEngine, container.Tags{"name": "web"})
 }
 
 type engine struct {
 	name  string
 	debug bool
 	port  int
-	*iris.Application
+	*Engine
 }
 
-func (cmd *engine) Handle(app contracts.Application) *gcli.Command {
+func (e *engine) Handle(app contracts.Application) *command.Command {
 	var conf contracts.Config
 	if err := app.Resolve(&conf); err != nil {
 		panic(err)
 	}
-	command := &gcli.Command{
+	cmd := &command.Command{
 		Name:    "web",
 		Aliases: []string{"http"},
 		Desc:    "开启http服务",
-		Config: func(c *gcli.Command) {
-			c.StrOpt(&cmd.name, "name", "n", conf.String("app.name", "web"), "web应用名称")
-			c.BoolOpt(&cmd.debug, "debug", "d", conf.Bool("app.debug", false), "是否开启web调试")
-			c.IntOpt(&cmd.port, "port", "p", conf.Int("http.port", 3000), "web服务监听端口")
+		Config: func(c *command.Command) {
+			c.StrOpt(&e.name, "name", "n", conf.String("app.name", "web"), "web应用名称")
+			c.BoolOpt(&e.debug, "debug", "d", conf.Bool("app.debug", false), "是否开启web调试")
+			c.IntOpt(&e.port, "port", "p", conf.Int("http.port", 3000), "web服务监听端口")
 		},
-		Func: func(c *gcli.Command, args []string) error {
-			addr := fmt.Sprintf("0.0.0.0:%d", cmd.port)
-			cmd.SetName(cmd.name)
-			if cmd.debug {
-				cmd.Logger().SetLevel("debug")
-				cmd.Logger().SetOutput(os.Stdout)
+		Func: func(c *command.Command, args []string) error {
+			addr := fmt.Sprintf("0.0.0.0:%d", e.port)
+			e.SetName(e.name)
+			if e.debug {
+				e.Logger().SetLevel("debug")
+				e.Logger().SetOutput(os.Stdout)
 			}
-			return cmd.Listen(
+			return e.Listen(
 				addr, iris.WithOptimizations,
 				iris.WithRemoteAddrPrivateSubnet("192.168.0.0", "192.168.255.255"),
 				iris.WithRemoteAddrPrivateSubnet("10.0.0.0", "10.255.255.255"),
 			)
 		},
 	}
-	return command
+	return cmd
 }
 
 func readAppDirectories(directory string, paths *[]string) {

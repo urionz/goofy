@@ -3,15 +3,15 @@ package goofy
 import (
 	"fmt"
 
-	"github.com/robfig/cron/v3"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/schedule"
 )
 
-func (app *Application) AddSchedules(scheduleJob contracts.ScheduleJob) contracts.Application {
+func (app *Application) AddSchedules(scheduleJob schedule.Job) contracts.Application {
 	for spec, jobs := range scheduleJob {
 		for _, job := range jobs {
 			switch j := job.(type) {
-			case cron.FuncJob:
+			case schedule.FuncJob:
 				app.AddJob(spec, j)
 				break
 			case func():

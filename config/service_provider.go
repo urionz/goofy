@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/goava/di"
 	"github.com/urionz/config"
 	"github.com/urionz/config/hcl"
 	"github.com/urionz/config/ini"
 	"github.com/urionz/config/json"
 	"github.com/urionz/config/toml"
 	"github.com/urionz/config/yaml"
+	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/ini/dotenv"
 )
@@ -36,5 +36,5 @@ func NewServiceProvider(app contracts.Application) error {
 
 	app.AddCommanders(contracts.FuncCommander(Command))
 
-	return app.ProvideValue(serve, di.As(new(contracts.Config)), di.Tags{"name": "config"})
+	return app.ProvideValue(serve, container.As(new(contracts.Config)), container.Tags{"name": "config"})
 }

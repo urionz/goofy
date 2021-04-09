@@ -1,10 +1,12 @@
 package contracts
 
+import "github.com/urionz/goofy/command"
+
 type (
 	Commander interface {
-		Handle(app Application) Command
+		Handle(app Application) *command.Command
 	}
-	FuncCommander func(app Application) Command
+	FuncCommander func(app Application) *command.Command
 )
 
-func (c FuncCommander) Handle(app Application) Command { return c(app) }
+func (c FuncCommander) Handle(app Application) *command.Command { return c(app) }

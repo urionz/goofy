@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/goava/di"
+	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -18,7 +18,7 @@ import (
 )
 
 type Manager struct {
-	di.Tags `name:"db"`
+	container.Tags `name:"db"`
 
 	connections sync.Map
 	conf        contracts.Config

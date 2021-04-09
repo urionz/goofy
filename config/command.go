@@ -6,8 +6,8 @@ import (
 	"path"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/gookit/gcli/v3"
 	"github.com/gookit/goutil/fsutil"
+	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/log"
 )
@@ -16,14 +16,14 @@ var (
 	mode = "dev"
 )
 
-func Command(app contracts.Application) *gcli.Command {
-	cmd := &gcli.Command{
+func Command(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "make-conf",
 		Desc: "生产环境配置文件",
-		Config: func(c *gcli.Command) {
+		Config: func(c *command.Command) {
 			c.StrOpt(&mode, "mode", "", "dev", "生成环境")
 		},
-		Func: func(cmd *gcli.Command, args []string) error {
+		Func: func(cmd *command.Command, args []string) error {
 			filePath := path.Join(app.Workspace(), fmt.Sprintf("config.%s.toml", mode))
 			if fsutil.FileExists(filePath) {
 				cover := false
