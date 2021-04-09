@@ -1,13 +1,68 @@
 package filesystem
 
 import (
+	"io"
 	"os"
+	"reflect"
 
 	"github.com/urionz/goofy/contracts"
 )
 
+const (
+	VisibilityPublic  = "public"
+	VisibilityPrivate = "private"
+)
+
 type Adapter struct {
-	driver contracts.Filesystem
+	driver  contracts.Filesystem
+	plugins map[string]contracts.PluginValue
+}
+
+var _ contracts.Filesystem = (*Adapter)(nil)
+
+func NewAdapter(driver contracts.Filesystem) *Adapter {
+	return &Adapter{
+		driver:  driver,
+		plugins: map[string]contracts.PluginValue{},
+	}
+}
+
+func (a *Adapter) GetPlugins() map[string]contracts.PluginValue {
+	return a.plugins
+}
+
+func (a *Adapter) AddPlugin(constructor contracts.PluginConstructor, name string) {
+	if _, ok := a.plugins[name]; !ok {
+		a.plugins[name] = contracts.PluginValue{
+			ArgLen: reflect.TypeOf(constructor).NumIn(),
+			Value:  reflect.ValueOf(constructor),
+		}
+	}
+}
+
+func (a *Adapter) CallMethod(name string, args ...interface{}) []interface{} {
+	method, exists := a.plugins[name]
+	if !exists {
+		return []interface{}{}
+	}
+	input := make([]reflect.Value, method.ArgLen)
+	for index, arg := range args {
+		input[index] = reflect.ValueOf(arg)
+	}
+	result := method.Value.Call(input)
+	var output []interface{}
+	for _, o := range result {
+		output = append(output, o.Interface())
+	}
+	return output
+}
+
+func (a *Adapter) Url(path string) string {
+	return a.driver.Url(path)
+}
+
+func (a *Adapter) WriteStream(path string, stream io.Reader) (string, error) {
+	return a.driver.WriteStream(path, stream)
 }
 
 func (a *Adapter) Exists(path string) bool {
@@ -22,7 +77,7 @@ func (a *Adapter) GetFile(path string) (*os.File, error) {
 	return a.driver.GetFile(path)
 }
 
-func (a *Adapter) Put(path string, contents []byte) error {
+func (a *Adapter) Put(path string, contents []byte) (string, error) {
 	return a.driver.Put(path, contents)
 }
 
@@ -30,11 +85,11 @@ func (a *Adapter) Delete(path ...string) error {
 	return a.driver.Delete(path...)
 }
 
-func (a *Adapter) Copy(from, to string) error {
+func (a *Adapter) Copy(from, to string) (string, error) {
 	return a.driver.Copy(from, to)
 }
 
-func (a *Adapter) Move(from, to string) error {
+func (a *Adapter) Move(from, to string) (string, error) {
 	return a.driver.Move(from, to)
 }
 
@@ -48,12 +103,4 @@ func (a *Adapter) Files(dir string, recursive bool, child ...bool) []contracts.F
 
 func (a *Adapter) AllFiles(dir string) []contracts.FileInfo {
 	return a.driver.AllFiles(dir)
-}
-
-var _ contracts.Filesystem = (*Adapter)(nil)
-
-func NewAdapter(driver contracts.Filesystem) *Adapter {
-	return &Adapter{
-		driver: driver,
-	}
 }

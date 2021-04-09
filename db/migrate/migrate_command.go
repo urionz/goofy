@@ -151,13 +151,13 @@ func Migrate(app contracts.Application) *gcli.Command {
 
 			if err := SwitchDBConnection(app); err != nil {
 				color.Warnln(err)
-				return err
+				return nil
 			}
 
 			changeDir(path.Join(app.Database(), "migrations"))
 			if err := RunMigrate(step); err != nil {
 				color.Warnln(err)
-				return err
+				return nil
 			}
 			return nil
 		},
@@ -177,12 +177,12 @@ func Rollback(app contracts.Application) *gcli.Command {
 		Func: func(c *gcli.Command, args []string) error {
 			if err := SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			if err := RunRollback(step); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 			return nil
 		},
@@ -202,7 +202,7 @@ func Refresh(app contracts.Application) *gcli.Command {
 			var err error
 			if err = SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			if step > 0 {
@@ -213,12 +213,12 @@ func Refresh(app contracts.Application) *gcli.Command {
 
 			if err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			if err = RunMigrate(step); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 			return nil
 		},
@@ -240,18 +240,18 @@ func Fresh(app contracts.Application) *gcli.Command {
 
 			if err = SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			if err := conn.Raw("show tables").Scan(&tables).Error; err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
-			for _, table := range tables {
-				if err := conn.Migrator().DropTable(table); err != nil {
+			for _, t := range tables {
+				if err := conn.Migrator().DropTable(t); err != nil {
 					color.Errorln(err)
-					return err
+					return nil
 				}
 			}
 
@@ -259,7 +259,7 @@ func Fresh(app contracts.Application) *gcli.Command {
 
 			if err := RunMigrate(step); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 			return nil
 		},
@@ -279,21 +279,21 @@ func Status(app contracts.Application) *gcli.Command {
 
 			if err = SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			repository := NewDBMigration(conn)
 			ran, err = repository.GetRan()
 			if err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 			ranNameCollection := collection.NewObjPointCollection(ran).Pluck("Migration")
 
 			batches, err = repository.GetMigrationBatches()
 			if err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			t := table.NewWriter()
@@ -330,11 +330,11 @@ func Reset(app contracts.Application) *gcli.Command {
 		Func: func(c *gcli.Command, args []string) error {
 			if err := SwitchDBConnection(app); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 			if err := RunReset(); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 			return nil
 		},
@@ -376,7 +376,7 @@ func Make(app contracts.Application) *gcli.Command {
 
 			if err := os.MkdirAll(path.Join(app.Database(), "migrations"), os.ModePerm); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			name = strutil.ToSnake(name)
@@ -394,7 +394,7 @@ func Make(app contracts.Application) *gcli.Command {
 
 			if err := WriteMigration(name, tableName, generatePath, isCreate); err != nil {
 				color.Errorln(err)
-				return err
+				return nil
 			}
 
 			color.Infoln("执行完毕")

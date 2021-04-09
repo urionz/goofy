@@ -22,7 +22,7 @@ type Manager struct {
 	customCreators sync.Map
 }
 
-type customCreator func(conf contracts.Config) interface{}
+type customCreator func(conf contracts.Config, manager *Manager) interface{}
 
 var _ contracts.FilesystemFactory = (*Manager)(nil)
 
@@ -69,7 +69,7 @@ func (m *Manager) resolve(name string) (contracts.Filesystem, error) {
 }
 
 func (m *Manager) createLocalDriver(conf contracts.Config) contracts.Filesystem {
-	return NewLocalDriver(conf.String("root"))
+	return NewLocalDriver(conf.String("root"), conf)
 }
 
 func (m *Manager) callCustomCreator(conf contracts.Config) (contracts.Filesystem, error) {
@@ -78,7 +78,7 @@ func (m *Manager) callCustomCreator(conf contracts.Config) (contracts.Filesystem
 	if !ok {
 		return nil, fmt.Errorf("the creator %+v is not support", customCreatorDriver)
 	}
-	driver := creator(conf)
+	driver := creator(conf, m)
 	if drive, ok := driver.(contracts.Filesystem); ok {
 		return m.adapt(drive), nil
 	}
@@ -86,7 +86,9 @@ func (m *Manager) callCustomCreator(conf contracts.Config) (contracts.Filesystem
 }
 
 func (m *Manager) adapt(filesystem contracts.Filesystem) contracts.Filesystem {
-	return NewAdapter(filesystem)
+	adapter := NewAdapter(filesystem)
+	adapter.plugins = filesystem.GetPlugins()
+	return adapter
 }
 
 func (m *Manager) getConfig(name string) contracts.Config {
@@ -95,4 +97,9 @@ func (m *Manager) getConfig(name string) contracts.Config {
 
 func (m *Manager) getDefaultDriver() string {
 	return m.conf.String("filesystems.default")
+}
+
+func (m *Manager) Extend(driver string, callback customCreator) *Manager {
+	m.customCreators.Store(driver, callback)
+	return m
 }

@@ -22,28 +22,64 @@ const (
 )
 
 type LocalDriver struct {
+	Adapter
 	pathPrefix string
+	conf contracts.Config
 }
 
-func (l *LocalDriver) Put(path string, contents []byte) error {
+var _ contracts.Filesystem = (*LocalDriver)(nil)
+
+func NewLocalDriver(prefix string, conf contracts.Config) *LocalDriver {
+	return &LocalDriver{
+		pathPrefix: prefix,
+		conf: conf,
+	}
+}
+
+func (l *LocalDriver) Url(path string) string {
+	return fmt.Sprintf("%s/%s", strings.TrimRight(l.conf.String("url"), "/"), l.applyPathPrefix(path))
+}
+
+func (l *LocalDriver) WriteStream(path string, stream io.Reader) (string, error) {
 	var handler *os.File
 	var err error
 	location := l.applyPathPrefix(path)
 	if err := l.ensureDirectory(filepath.Dir(location)); err != nil {
-		return err
+		return "", err
+	}
+	handler, _ = os.OpenFile(location, DefaultFileFlags, os.ModePerm)
+	defer handler.Close()
+	if _, err = io.Copy(handler, stream); err != nil {
+		return "", err
+	}
+	if err = handler.Sync(); err != nil {
+		return "", err
+	}
+	if err = handler.Chmod(FilePublicPermission); err != nil {
+		return "", err
+	}
+	return l.Url(path), nil
+}
+
+func (l *LocalDriver) Put(path string, contents []byte) (string, error) {
+	var handler *os.File
+	var err error
+	location := l.applyPathPrefix(path)
+	if err := l.ensureDirectory(filepath.Dir(location)); err != nil {
+		return "", err
 	}
 	handler, _ = os.OpenFile(location, DefaultFileFlags, os.ModePerm)
 	defer handler.Close()
 	if _, err = handler.Write(contents); err != nil {
-		return err
+		return "", err
 	}
 	if err = handler.Sync(); err != nil {
-		return err
+		return "", err
 	}
 	if err = handler.Chmod(FilePublicPermission); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return l.Url(path), nil
 }
 
 func (l *LocalDriver) Delete(path ...string) error {
@@ -55,40 +91,41 @@ func (l *LocalDriver) Delete(path ...string) error {
 	return nil
 }
 
-func (l *LocalDriver) Copy(from, to string) error {
+func (l *LocalDriver) Copy(from, to string) (string, error) {
 	var fromHandler, toHandler *os.File
 	var err error
 	if !l.Exists(from) {
-		return fmt.Errorf("the %s is not exists", from)
+		return "", fmt.Errorf("the %s is not exists", from)
 	}
 	if fromHandler, err = l.GetFile(from); err != nil {
-		return err
+		return "", err
 	}
 	defer fromHandler.Close()
 	toLocation := l.applyPathPrefix(to)
 	if err := l.ensureDirectory(filepath.Dir(toLocation)); err != nil {
-		return err
+		return "", err
 	}
 	if toHandler, err = os.Create(toLocation); err != nil {
-		return err
+		return "", err
 	}
 	defer toHandler.Close()
 
 	if _, err = io.Copy(toHandler, fromHandler); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return l.Url(to), nil
 }
 
-func (l *LocalDriver) Move(from, to string) error {
-	if err := l.Copy(from, to); err != nil {
-		return err
+func (l *LocalDriver) Move(from, to string) (string, error) {
+	u, err := l.Copy(from, to)
+	if err != nil {
+		return "", err
 	}
 	if err := os.Remove(l.applyPathPrefix(from)); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return u, nil
 }
 
 func (l *LocalDriver) Size(path string) int64 {
@@ -175,17 +212,9 @@ func (l *LocalDriver) ensureDirectory(path string) error {
 }
 
 func (l *LocalDriver) applyPathPrefix(p string) string {
-	return path.Join(l.getPathPrefix(), strings.TrimRight(p, "/"))
+	return path.Join(l.getPathPrefix(), strings.TrimLeft(p, "/"))
 }
 
 func (l *LocalDriver) getPathPrefix() string {
 	return l.pathPrefix
-}
-
-var _ contracts.Filesystem = (*LocalDriver)(nil)
-
-func NewLocalDriver(prefix string) *LocalDriver {
-	return &LocalDriver{
-		pathPrefix: prefix,
-	}
 }
