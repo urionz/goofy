@@ -9,6 +9,7 @@ import (
 	"github.com/goava/di"
 	"github.com/gookit/gcli/v3"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/kataras/iris/v12/middleware/logger"
 	irisRecover "github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/middleware/requestid"
@@ -29,6 +30,9 @@ func NewServiceProvider(app contracts.Application) error {
 	webEngine.Use(requestid.New(), irisRecover.New(), logger.New())
 	app.AddCommanders(&engine{
 		Application: webEngine,
+	})
+	webEngine.PartyFunc("", func(p router.Party) {
+
 	})
 	return app.ProvideValue(webEngine, di.Tags{"name": "web"})
 }

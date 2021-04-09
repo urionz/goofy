@@ -1,14 +1,10 @@
 package contracts
 
-import (
-	"github.com/gookit/gcli/v3"
-)
-
 type (
 	Commander interface {
-		Handle(app Application) *gcli.Command
+		Handle(app Application) Command
 	}
-	FuncCommander func(app Application) *gcli.Command
+	FuncCommander func(app Application) Command
 )
 
-func (c FuncCommander) Handle(app Application) *gcli.Command { return c(app) }
+func (c FuncCommander) Handle(app Application) Command { return c(app) }

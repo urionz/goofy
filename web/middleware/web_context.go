@@ -11,6 +11,7 @@ func InjectWebContext(ctx iris.Context) {
 			Context: ctx,
 		},
 		&web.Validation{},
+
 	}
 
 	for _, dep := range depends {
