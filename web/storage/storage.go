@@ -60,7 +60,7 @@ func (s *Storage) Upload(req *http.Request, savePath string) (string, error) {
 	t := time.Now()
 	date := t.Format("20060102")
 	if ext := filepath.Ext(savePath); ext == "" {
-		savePath = path.Join(date, savePath, strutil.Md5(fmt.Sprintf("%s%s", fh.Filename, date))+"."+filepath.Ext(fh.Filename))
+		savePath = path.Join(date, savePath, strutil.Md5(fmt.Sprintf("%s%s", fh.Filename, date))+filepath.Ext(fh.Filename))
 	} else {
 		savePath = path.Join(date, savePath)
 	}
