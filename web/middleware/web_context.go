@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+
 	"github.com/kataras/iris/v12"
 	"github.com/urionz/goofy/filesystem"
 	"github.com/urionz/goofy/web/context"
@@ -11,6 +13,7 @@ import (
 func InjectWebContext(manager *filesystem.Manager) func(ctx iris.Context) {
 	return func(ctx iris.Context) {
 		store := storage.NewStorage(manager)
+		fmt.Println("store === ", store)
 		depends := []interface{}{
 			&context.Context{
 				Context: ctx,
