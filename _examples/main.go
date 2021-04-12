@@ -7,7 +7,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
-	"github.com/urionz/goofy/_examples/cos"
 	_ "github.com/urionz/goofy/_examples/database/migrations"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/validator"
@@ -17,7 +16,6 @@ import (
 
 func main() {
 	goofy.Default.AddServices(
-		cos.ServiceProvider,
 		func(router *iris.APIContainer, app contracts.Application) {
 			router.PartyFunc("/", func(router *iris.APIContainer) {
 				router.PartyFunc("/idol", func(route *iris.APIContainer) {
@@ -44,8 +42,8 @@ func (*Req) Rules(_ *context.Context) validator.MapData {
 
 func (*Test) Post(ctx *context.Context, validate *validation.Validation) {
 	// stream, _, _ := ctx.FormFile("avatar")
-	fmt.Println(ctx.FileName("avatar").Disk("cos").Upload(ctx.Request(), "test"))
 	// f, err := fh.Open()
+	fmt.Println(ctx.FileExists("test"))
 }
 
 func TestHandler(c iris.Context) {
