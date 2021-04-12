@@ -5,6 +5,16 @@ import (
 	"github.com/urionz/goofy/contracts"
 )
 
+func init() {
+	contracts.AddConfTpl(`[filesystems]
+default = "local"
+    [filesystems.disks.local]
+    driver = "local"
+    root = "storage/local"
+    url = "http://localhost"
+`)
+}
+
 func NewServiceProvider(app contracts.Application, conf contracts.Config) error {
 	var err error
 	var provide = func(value di.Value, options ...di.ProvideOption) {

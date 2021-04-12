@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 	"mime/multipart"
+	"reflect"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
 	_ "github.com/urionz/goofy/_examples/database/migrations"
 	"github.com/urionz/goofy/contracts"
-	"github.com/urionz/goofy/log"
 	"github.com/urionz/goofy/validator"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
@@ -42,11 +42,12 @@ func (*Req) Rules(_ *context.Context) validator.MapData {
 }
 
 func (*Test) Post(ctx *context.Context, validate *validation.Validation) {
-	var r Req
-	if err := validate.Validate(ctx, &r); err != nil {
-		log.Error(err)
-	}
-	fmt.Println(r.Avatar)
+	fmt.Println(reflect.TypeOf(ctx.Manager.Disk()), "test")
+	// var r Req
+	// if err := validate.Validate(ctx, &r); err != nil {
+	// 	log.Error(err)
+	// }
+	// fmt.Println(r.Avatar)
 }
 
 func TestHandler(c iris.Context) {
