@@ -13,6 +13,8 @@ import (
 	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/filesystem"
+	"github.com/urionz/goofy/web/middleware"
 )
 
 func init() {
@@ -24,13 +26,17 @@ port = 4000
 `)
 }
 
-func NewServiceProvider(app contracts.Application) error {
+func NewServiceProvider(app contracts.Application, store *filesystem.Manager) error {
 	webEngine := iris.New()
-	webEngine.Use(requestid.New(), irisRecover.New(), logger.New())
+	ctn := webEngine.ConfigureContainer()
+	ctn.Use(requestid.New(), irisRecover.New(), logger.New(), middleware.InjectWebContext(store))
 	app.AddCommanders(&engine{
 		Application: webEngine,
 	})
-	return app.ProvideValue(webEngine, container.Tags{"name": "web"})
+	if err := app.ProvideValue(webEngine, container.Tags{"name": "web"}); err != nil {
+		return err
+	}
+	return app.ProvideValue(ctn, container.Tags{"name": "router"})
 }
 
 type engine struct {

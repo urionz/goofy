@@ -1,4 +1,4 @@
-package web
+package validation
 
 import (
 	"sort"
@@ -25,9 +25,6 @@ func (*BaseValidator) Messages(_ *context.Context) validator.MapData {
 }
 
 type Validation struct {
-}
-
-type ValidationOption struct {
 }
 
 func validate(bindingFunc func(rdp IValidation) error, ctx *context.Context, reqDataPtr IValidation, maxMemoryLimit ...int64) *errors.CodeError {
