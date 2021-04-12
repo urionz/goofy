@@ -55,6 +55,7 @@ func (v *Validation) Validate(ctx *context.Context, reqDataPtr IValidation, maxM
 		_ = ctx.ReadQuery(reqDataPtr)
 		_ = ctx.ReadForm(reqDataPtr)
 		_ = ctx.ReadJSON(reqDataPtr)
+
 		return nil
 	}, ctx, reqDataPtr, maxMemoryLimit...)
 }

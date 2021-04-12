@@ -54,7 +54,7 @@ func (s *Storage) Upload(req *http.Request, savePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if !arrutil.StringsHas(s.mimes, uploadMineType) {
+	if !arrutil.StringsHas(s.mimes, uploadMineType) && !arrutil.StringsHas(s.mimes, "*") {
 		return "", fmt.Errorf("the file mine type is illegal")
 	}
 	t := time.Now()

@@ -1,11 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"mime/multipart"
+
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
 	_ "github.com/urionz/goofy/_examples/database/migrations"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/log"
+	"github.com/urionz/goofy/validator"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
 )
@@ -27,11 +32,21 @@ type Test struct {
 
 type Req struct {
 	validation.BaseValidator
+	Avatar multipart.File `form:"avatar"`
 }
 
-func (*Test) Get(ctx *context.Context, validate *validation.Validation) {
+func (*Req) Rules(_ *context.Context) validator.MapData {
+	return validator.MapData{
+		"file:avatar": []string{"ext:zip", "required"},
+	}
+}
+
+func (*Test) Post(ctx *context.Context, validate *validation.Validation) {
 	var r Req
-	validate.Validate(ctx, &r)
+	if err := validate.Validate(ctx, &r); err != nil {
+		log.Error(err)
+	}
+	fmt.Println(r.Avatar)
 }
 
 func TestHandler(c iris.Context) {
