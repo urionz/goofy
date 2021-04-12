@@ -39,7 +39,7 @@ func (s *Storage) AllowMime(mimes []string) *Storage {
 }
 
 func (s *Storage) Disk(disk ...string) *Storage {
-	if len(disk) >= 0 && disk[0] != "" {
+	if len(disk) > 0 && disk[0] != "" {
 		s.disk = disk[0]
 	}
 	return s
@@ -64,7 +64,7 @@ func (s *Storage) Upload(req *http.Request, savePath string) (string, error) {
 	} else {
 		savePath = path.Join(date, savePath)
 	}
-	return s.Manager.Disk(s.disk).WriteStream(savePath, f)
+	return s.Manager.Disk(s.disk).Upload(savePath, fh)
 }
 
 func (*Storage) MimeType(file multipart.File) (string, error) {

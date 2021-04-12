@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"os"
 	"path"
 	"path/filepath"
@@ -24,7 +25,7 @@ const (
 type LocalDriver struct {
 	Adapter
 	pathPrefix string
-	conf contracts.Config
+	conf       contracts.Config
 }
 
 var _ contracts.Filesystem = (*LocalDriver)(nil)
@@ -32,7 +33,7 @@ var _ contracts.Filesystem = (*LocalDriver)(nil)
 func NewLocalDriver(prefix string, conf contracts.Config) *LocalDriver {
 	return &LocalDriver{
 		pathPrefix: prefix,
-		conf: conf,
+		conf:       conf,
 	}
 }
 
@@ -59,6 +60,15 @@ func (l *LocalDriver) WriteStream(path string, stream io.Reader) (string, error)
 		return "", err
 	}
 	return l.Url(path), nil
+}
+
+func (l *LocalDriver) Upload(path string, fh *multipart.FileHeader) (string, error) {
+	file, err := fh.Open()
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	return l.WriteStream(path, file)
 }
 
 func (l *LocalDriver) Put(path string, contents []byte) (string, error) {

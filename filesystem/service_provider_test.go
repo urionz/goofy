@@ -1,7 +1,9 @@
 package filesystem_test
 
 import (
+	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/goava/di"
@@ -42,6 +44,10 @@ func TestNewServiceProvider(t *testing.T) {
 			require.NoError(t, err)
 			_, err = disk.Get("zhangsan/lisi.txt")
 			require.NoError(t, err)
+
+			f, err := os.Open("./test.png")
+			fmt.Println(err)
+			fmt.Println(disk.WriteStream("storage/n.png", f))
 		}).Run()
 	})
 }

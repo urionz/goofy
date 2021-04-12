@@ -2,6 +2,7 @@ package filesystem
 
 import (
 	"io"
+	"mime/multipart"
 	"os"
 	"reflect"
 
@@ -63,6 +64,10 @@ func (a *Adapter) Url(path string) string {
 
 func (a *Adapter) WriteStream(path string, stream io.Reader) (string, error) {
 	return a.driver.WriteStream(path, stream)
+}
+
+func (a *Adapter) Upload(path string, fh *multipart.FileHeader) (string, error) {
+	return a.driver.Upload(path, fh)
 }
 
 func (a *Adapter) Exists(path string) bool {

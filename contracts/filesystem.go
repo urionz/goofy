@@ -2,6 +2,7 @@ package contracts
 
 import (
 	"io"
+	"mime/multipart"
 	"os"
 	"reflect"
 )
@@ -34,6 +35,8 @@ type Filesystem interface {
 	Put(path string, contents []byte) (string, error)
 	// Write a new file using a stream.
 	WriteStream(path string, stream io.Reader) (string, error)
+	// Upload a file
+	Upload(path string, fh *multipart.FileHeader) (string, error)
 	// delete the file at a given path
 	Delete(path ...string) error
 	// copy a file to a new location
