@@ -172,6 +172,7 @@ func Rollback(app contracts.Application) *command.Command {
 		Category: "migrate",
 		Desc:     "迁移回滚",
 		Config: func(c *command.Command) {
+			c.StrOpt(&driver, "conn", "", "", "指定数据库连接")
 			c.IntOpt(&step, "step", "s", 0, "指定迁移阶段")
 		},
 		Func: func(c *command.Command, args []string) error {

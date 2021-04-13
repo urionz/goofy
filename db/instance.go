@@ -49,3 +49,29 @@ func Tx(txFunc func(tx *DB) error, connections ...*DB) (err error) {
 
 	return err
 }
+
+func GetAllTable(connections ...*DB) []string {
+	conn := Default()
+	if len(connections) > 0 && connections[0] != nil {
+		conn = connections[0]
+	}
+	var tables []string
+	if err := conn.Raw("show tables").Scan(&tables).Error; err != nil {
+		return tables
+	}
+	return tables
+}
+
+func DropAllTable(connections ...*DB) error {
+	conn := Default()
+	if len(connections) > 0 && connections[0] != nil {
+		conn = connections[0]
+	}
+	tables := GetAllTable()
+	for _, table := range tables {
+		if err := conn.Migrator().DropTable(table); err != nil {
+			return err
+		}
+	}
+	return nil
+}
