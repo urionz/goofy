@@ -21,7 +21,6 @@ import (
 	"github.com/urionz/goofy/filesystem"
 	"github.com/urionz/goofy/log"
 	"github.com/urionz/goofy/redis"
-	"github.com/urionz/goofy/validator"
 	"github.com/urionz/goofy/web"
 )
 
@@ -29,7 +28,7 @@ var Default = New(SetWorkspace("./")).AddServices(
 	config.NewServiceProvider, log.NewServiceProvider,
 	redis.NewServiceProvider, db.NewServiceProvider,
 	cache.NewServiceProvider, filesystem.NewServiceProvider,
-	validator.NewServiceProvider, web.NewServiceProvider,
+	web.NewServiceProvider,
 ).AddCommanders(
 	contracts.FuncCommander(dlv.Command),
 	contracts.FuncCommander(repl.Command),

@@ -9,6 +9,7 @@ import (
 )
 
 func InjectWebContext(manager *filesystem.Manager) func(ctx iris.Context) {
+	validate := validation.NewValidation()
 	return func(ctx iris.Context) {
 		store := storage.NewStorage(manager)
 		depends := []interface{}{
@@ -16,7 +17,7 @@ func InjectWebContext(manager *filesystem.Manager) func(ctx iris.Context) {
 				Context: ctx,
 				Storage: store,
 			},
-			&validation.Validation{},
+			validate,
 		}
 
 		for _, dep := range depends {

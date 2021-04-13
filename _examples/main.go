@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"mime/multipart"
 
 	"github.com/kataras/iris/v12"
@@ -9,7 +8,8 @@ import (
 	"github.com/urionz/goofy"
 	_ "github.com/urionz/goofy/_examples/database/migrations"
 	"github.com/urionz/goofy/contracts"
-	"github.com/urionz/goofy/validator"
+	"github.com/urionz/goofy/log"
+	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
 )
@@ -30,20 +30,18 @@ type Test struct {
 }
 
 type Req struct {
-	validation.BaseValidator
-	Avatar multipart.File `form:"avatar"`
+	Avatar   *multipart.FileHeader `valid:"required_without_all(Name|Nickname)~头像不存在" form:"avatar"`
+	Name     string                `valid:"optional~名称不存在" form:"name"`
+	Nickname string                `form:"nickname"`
 }
 
-func (*Req) Rules(_ *context.Context) validator.MapData {
-	return validator.MapData{
-		"file:avatar": []string{"ext:zip", "required"},
+func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.JsonResult {
+	var req Req
+	if err := validate.Validate(ctx, &req); err != nil {
+		log.Error(err)
+		return web.JsonError(err)
 	}
-}
-
-func (*Test) Post(ctx *context.Context, validate *validation.Validation) {
-	// stream, _, _ := ctx.FormFile("avatar")
-	// f, err := fh.Open()
-	fmt.Println(ctx.FileExists("test"))
+	return web.JsonSuccess()
 }
 
 func TestHandler(c iris.Context) {
