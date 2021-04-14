@@ -26,7 +26,7 @@ type Application interface {
 	ProvideValue(value di.Value, options ...di.ProvideOption) error
 	Provide(constructor di.Constructor, options ...di.ProvideOption) error
 	Resolve(ptr di.Pointer, options ...di.ResolveOption) error
-	Call(args ...string) int
+	Call(name string, args ...string) error
 
 	Workspace() string
 	Dir() string

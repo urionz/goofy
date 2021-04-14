@@ -49,7 +49,8 @@ func NewServiceProvider(app contracts.Application, conf contracts.Config) error 
 		contracts.FuncCommander(migrate.Rollback), contracts.FuncCommander(migrate.Status),
 		contracts.FuncCommander(migrate.Reset), contracts.FuncCommander(migrate.Refresh),
 		contracts.FuncCommander(migrate.Fresh), contracts.FuncCommander(model.Make),
-		contracts.FuncCommander(seed.Seed),
+		contracts.FuncCommander(model.MakeRepo), contracts.FuncCommander(seed.Seed),
+		contracts.FuncCommander(model.MakeService),
 	)
 	instance = NewManager(conf)
 	return app.ProvideValue(instance, di.As(new(contracts.DBFactory)))

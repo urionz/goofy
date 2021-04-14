@@ -104,8 +104,8 @@ func (app *Application) Run() contracts.Application {
 	return app
 }
 
-func (app *Application) Call(args ...string) int {
-	return app.App.Run(args)
+func (app *Application) Call(name string, args ...string) error {
+	return app.App.Exec(name, args)
 }
 
 func (app *Application) Error() error {

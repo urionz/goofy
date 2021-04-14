@@ -26,7 +26,7 @@ require (
 	github.com/urionz/collection v1.3.3
 	github.com/urionz/color v1.3.9
 	github.com/urionz/config v1.1.1-0.20210301084331-76f34bf46ec3
-	github.com/urionz/goutil v0.4.1
+	github.com/urionz/goutil v0.4.2
 	github.com/urionz/ini v1.1.1-0.20210301084658-9746b6337838
 	go.uber.org/zap v1.16.0
 	golang.org/x/mod v0.4.2 // indirect

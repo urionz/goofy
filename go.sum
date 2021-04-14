@@ -321,6 +321,8 @@ github.com/urionz/config v1.1.1-0.20210301084331-76f34bf46ec3 h1:gjx+DiqLwgae2ql
 github.com/urionz/config v1.1.1-0.20210301084331-76f34bf46ec3/go.mod h1:apZC2QqL/X2SlFeSHTChro+1x6SW4gJafJCkOszpuos=
 github.com/urionz/goutil v0.4.1 h1:6cW+Xi0Wgh0TxbJzNYAqBwJQLAD2ZZkJMt1yGemDk/U=
 github.com/urionz/goutil v0.4.1/go.mod h1:8XEx+qQjo0P4uLppqiwj4gW8Fw6zGkqSVS9bQNL2n6k=
+github.com/urionz/goutil v0.4.2 h1:8hb2z8Uo9J/p/MOYeq1IhnUJzqQJu35aBLMu0dtQFjM=
+github.com/urionz/goutil v0.4.2/go.mod h1:9w575O+uZcmjosimINQjxGBoGyeXgkSZj+keyCQACeM=
 github.com/urionz/ini v1.1.1-0.20210301082000-7fe52a239e90/go.mod h1:N8KmD0PQAsIuLbMfxesA9hJtgiRjtF8TgdbCrMa2x5w=
 github.com/urionz/ini v1.1.1-0.20210301084658-9746b6337838 h1:3sUGG0Gg0ri2dg20DF83Lr+5geijaImI70dYVjXxUJU=
 github.com/urionz/ini v1.1.1-0.20210301084658-9746b6337838/go.mod h1:N8KmD0PQAsIuLbMfxesA9hJtgiRjtF8TgdbCrMa2x5w=

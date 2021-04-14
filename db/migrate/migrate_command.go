@@ -357,11 +357,17 @@ func Make(app contracts.Application) *command.Command {
 		Config: func(c *command.Command) {
 			c.StrOpt(&tableName, "table", "t", "", "The table to migrate")
 			c.StrOpt(&create, "create", "c", "", "The table to be created")
+			c.BindArg(&command.Argument{
+				Name: "name", Desc: "迁移文件名称",
+			})
 		},
 		Func: func(c *command.Command, args []string) error {
 			var prompt *survey.Input
 			var name string
 			var isCreate bool
+			if len(args) > 0 {
+				name = args[0]
+			}
 			for {
 				if name != "" || len(args) >= 1 {
 					break
@@ -370,9 +376,6 @@ func Make(app contracts.Application) *command.Command {
 					Message: "请输入文件名称：",
 				}
 				survey.AskOne(prompt, &name)
-			}
-			if name == "" {
-				name = args[0]
 			}
 
 			if err := os.MkdirAll(path.Join(app.Database(), "migrations"), os.ModePerm); err != nil {
