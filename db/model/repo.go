@@ -18,7 +18,7 @@ var repoStub = `package repo
 
 import (
 	"github.com/urionz/goofy/db"
-	"{{ .ModName }}/{{ .MvcPath }}models"
+	"{{ PathJoin .ModName .MvcPath "models" }}"
 	"github.com/urionz/goofy/pagination"
 	"github.com/urionz/goofy/web"
 
@@ -34,7 +34,7 @@ func new{{ ToCamel .Name }}Repo() *{{ ToLowerCamel .Name }}Repo {
 	return &{{ ToLowerCamel .Name }}Repo{}
 }
 
-func (r *{{ ToLowerCamel .Name }}Repo) Get(db *gorm.DB, id uint64) *models.{{ ToCamel .Name }} {
+func (r *{{ ToLowerCamel .Name }}Repo) Get(db *gorm.DB, id uint) *models.{{ ToCamel .Name }} {
 	ret := &models.{{ ToCamel .Name }}{}
 	if err := db.First(ret, "id = ?", id).Error; err != nil {
 		return nil
@@ -89,22 +89,22 @@ func (r *{{ ToLowerCamel .Name }}Repo) Update(db *gorm.DB, t *models.{{ ToCamel 
 	return
 }
 
-func (r *{{ ToLowerCamel .Name }}Repo) Updates(db *gorm.DB, id uint64, columns map[string]interface{}) (err error) {
+func (r *{{ ToLowerCamel .Name }}Repo) Updates(db *gorm.DB, id uint, columns map[string]interface{}) (err error) {
 	err = db.Model(&models.{{ ToCamel .Name }}{}).Where("id = ?", id).Updates(columns).Error
 	return
 }
 
-func (r *{{ ToLowerCamel .Name }}Repo) UpdateColumn(db *gorm.DB, id uint64, name string, value interface{}) (err error) {
+func (r *{{ ToLowerCamel .Name }}Repo) UpdateColumn(db *gorm.DB, id uint, name string, value interface{}) (err error) {
 	err = db.Model(&models.{{ ToCamel .Name }}{}).Where("id = ?", id).UpdateColumn(name, value).Error
 	return
 }
 
-func (r *{{ ToLowerCamel .Name }}Repo) SoftDelete(db *gorm.DB, id uint64) (err error) {
+func (r *{{ ToLowerCamel .Name }}Repo) SoftDelete(db *gorm.DB, id uint) (err error) {
 	err = db.Delete(&models.{{ ToCamel .Name }}{}, "id = ?", id).Error
 	return
 }
 
-func (r *{{ ToLowerCamel .Name }}Repo) Delete(db *gorm.DB, id uint64) (err error) {
+func (r *{{ ToLowerCamel .Name }}Repo) Delete(db *gorm.DB, id uint) (err error) {
 	err = db.Unscoped().Delete(&models.{{ ToCamel .Name }}{}, "id = ?", id).Error
 	return
 }
@@ -198,6 +198,7 @@ func repoPopulateStub() (string, error) {
 		"ToCamel":      strutil.ToCamel,
 		"ToLowerCamel": strutil.ToLowerCamel,
 		"ToSnake":      strutil.ToSnake,
+		"PathJoin":     path.Join,
 	}).Parse(repoStub)
 	if err != nil {
 		return templateBuffer.String(), err

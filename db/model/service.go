@@ -17,9 +17,9 @@ import (
 var serviceStub = `package services
 
 import (
-	"{{ .ModName }}/{{ .MvcPath }}models"
+	"{{ PathJoin .ModName .MvcPath "models" }}"
 	"github.com/urionz/goofy/pagination"
-	repo "{{ .ModName }}/{{ .MvcPath }}repositories"
+	repo "{{ PathJoin .ModName .MvcPath "repositories" }}"
 	
 	"github.com/urionz/goofy/db"
 	"github.com/urionz/goofy/web"
@@ -34,7 +34,7 @@ func new{{ ToCamel .Name }}Service() *{{ ToLowerCamel .Name }}Service {
 	return &{{ ToLowerCamel .Name }}Service{}
 }
 
-func (s {{ ToLowerCamel .Name }}Service) Get(id uint64) *models.{{ ToCamel .Name }} {
+func (s {{ ToLowerCamel .Name }}Service) Get(id uint) *models.{{ ToCamel .Name }} {
 	return repo.{{ ToCamel .Name }}Repo.Get(db.Model(&models.{{ ToCamel .Name }}{}), id)
 }
 
@@ -63,17 +63,17 @@ func (s {{ ToLowerCamel .Name }}Service) Update(t *models.{{ ToCamel .Name }}) e
 	return err
 }
 
-func (s {{ ToLowerCamel .Name }}Service) Updates(id uint64, columns map[string]interface{}) error {
+func (s {{ ToLowerCamel .Name }}Service) Updates(id uint, columns map[string]interface{}) error {
 	err := repo.{{ ToCamel .Name }}Repo.Updates(db.Model(&models.{{ ToCamel .Name }}{}), id, columns)
 	return err
 }
 
-func (s {{ ToLowerCamel .Name }}Service) UpdateColumn(id uint64, name string, value interface{}) error {
+func (s {{ ToLowerCamel .Name }}Service) UpdateColumn(id uint, name string, value interface{}) error {
 	err := repo.{{ ToCamel .Name }}Repo.UpdateColumn(db.Model(&models.{{ ToCamel .Name }}{}), id, name, value)
 	return err
 }
 
-func (s {{ ToLowerCamel .Name }}Service) Delete(id uint64, soft ...bool) error {
+func (s {{ ToLowerCamel .Name }}Service) Delete(id uint, soft ...bool) error {
 	if len(soft) > 0 && soft[0] {
 		return repo.{{ ToCamel .Name }}Repo.SoftDelete(db.Model(&models.{{ ToCamel .Name }}{}), id)
 	}
@@ -167,6 +167,7 @@ func servicePopulateStub() (string, error) {
 	tpl, err := template.New("services").Funcs(template.FuncMap{
 		"ToCamel":      strutil.ToCamel,
 		"ToLowerCamel": strutil.ToLowerCamel,
+		"PathJoin":     path.Join,
 	}).Parse(serviceStub)
 	if err != nil {
 		return templateBuffer.String(), err
