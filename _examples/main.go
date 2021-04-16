@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"mime/multipart"
 
 	"github.com/kataras/iris/v12"
@@ -29,9 +30,9 @@ type Test struct {
 }
 
 type Req struct {
-	Avatar   *multipart.FileHeader `valid:"required_without_all(Name|Nickname)~头像不存在" form:"avatar"`
-	Name     string                `valid:"optional~名称不存在" form:"name"`
-	Nickname string                `form:"nickname"`
+	Files    []*multipart.FileHeader `valid:"mime(image/png)~错误" form:"file[]"`
+	Name     string                  `valid:"optional~名称不存在" form:"name"`
+	Nickname string                  `form:"nickname"`
 }
 
 func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.JsonResult {
@@ -40,6 +41,7 @@ func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.Js
 		log.Error(err)
 		return web.JsonError(err)
 	}
+	fmt.Println(req.Files)
 	return web.JsonSuccess()
 }
 

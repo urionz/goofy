@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -34,7 +35,7 @@ func getMimeType(file multipart.File) (string, error) {
 
 func (v *Validation) Register() {
 	govalidator.InterfaceParamTagMap["ext"] = func(in interface{}, all reflect.Value, params ...string) bool {
-		var filename string
+		var filenames []string
 		if len(params) == 0 {
 			return false
 		}
@@ -42,32 +43,45 @@ func (v *Validation) Register() {
 		switch reflect.TypeOf(in).Kind() {
 		case reflect.TypeOf(&multipart.FileHeader{}).Kind():
 			fh := in.(*multipart.FileHeader)
-			filename = fh.Filename
+			filenames = append(filenames, fh.Filename)
+			break
+		case reflect.TypeOf([]*multipart.FileHeader{}).Kind():
+			fhs := in.([]*multipart.FileHeader)
+			for _, fh := range fhs {
+				filenames = append(filenames, fh.Filename)
+			}
 			break
 		case reflect.String:
-			filename = in.(string)
+			filenames = append(filenames, in.(string))
 			break
 		}
 
-		for _, ext := range shouldExt {
-			if strings.HasSuffix(filename, ext) {
-				return true
+		for _, filename := range filenames {
+			if !arrutil.StringsHas(shouldExt, filepath.Ext(filename)) {
+				return false
 			}
 		}
-
-		return false
+		return true
 	}
 	govalidator.InterfaceParamTagRegexMap["ext"] = regexp.MustCompile("^ext\\((.*)\\)")
 
 	govalidator.InterfaceParamTagMap["mime"] = func(in interface{}, all reflect.Value, params ...string) bool {
 		var mime string
+		var fhs []*multipart.FileHeader
 		if len(params) == 0 {
 			return false
 		}
 		shouldMimes := strings.Split(params[0], "|")
 		switch reflect.TypeOf(in).Kind() {
 		case reflect.TypeOf(&multipart.FileHeader{}).Kind():
-			fh := in.(*multipart.FileHeader)
+			fhs = []*multipart.FileHeader{in.(*multipart.FileHeader)}
+			break
+		case reflect.TypeOf([]*multipart.FileHeader{}).Kind():
+			fhs = in.([]*multipart.FileHeader)
+			break
+		}
+
+		for _, fh := range fhs {
 			file, err := fh.Open()
 			if err != nil {
 				return false
@@ -77,7 +91,6 @@ func (v *Validation) Register() {
 			} else {
 				mime = mType
 			}
-			break
 		}
 
 		if arrutil.StringsHas(shouldMimes, mime) {
@@ -104,11 +117,15 @@ func (v *Validation) Validate(ctx *context.Context, reqPtr interface{}) *errors.
 	numField := val.NumField()
 
 	for i := 0; i < numField; i++ {
-		if field := val.Field(i); field.Type().String() == "*multipart.FileHeader" {
+		if field := val.Field(i); field.Type().String() == "*multipart.FileHeader" || field.Type().String() == "[]*multipart.FileHeader" {
 			if name, exists := typ.Field(i).Tag.Lookup("form"); exists {
 				if ctx.FileExists(name) {
-					_, fh, _ := ctx.FormFile(name)
-					field.Set(reflect.ValueOf(fh))
+					if field.Type().String() == "*multipart.FileHeader" {
+						_, fh, _ := ctx.FormFile(name)
+						field.Set(reflect.ValueOf(fh))
+					} else {
+						field.Set(reflect.ValueOf(ctx.Request().MultipartForm.File[name]))
+					}
 				}
 			}
 		}
