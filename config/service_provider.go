@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"path"
 
+	"github.com/shima-park/agollo"
 	"github.com/urionz/config"
 	"github.com/urionz/config/hcl"
 	"github.com/urionz/config/ini"
@@ -12,10 +14,23 @@ import (
 	"github.com/urionz/config/yaml"
 	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/log"
 	"github.com/urionz/ini/dotenv"
 )
 
+const (
+	DrvFile   = "file"
+	DrvApollo = "apollo"
+)
+
 func NewServiceProvider(app contracts.Application) error {
+	if err := dotenv.LoadExists(app.Workspace(), ".env"); err != nil {
+		return err
+	}
+
+	confDriver := dotenv.Get("CONF_DRIVER", "file")
+	envConf := dotenv.Get("APP_ENV", "dev")
+
 	serve = &Configure{
 		Config: config.New("goofy"),
 	}
@@ -26,12 +41,52 @@ func NewServiceProvider(app contracts.Application) error {
 	serve.AddDriver(hcl.Driver)
 	serve.AddDriver(toml.Driver)
 
-	dotenv.LoadExists(app.Workspace(), ".env")
+	switch confDriver {
+	case DrvFile:
+		envConfFile := dotenv.Get("APP_CONF", fmt.Sprintf("config.%s.toml", envConf))
 
-	envConfFile := dotenv.Get("APP_CONF", fmt.Sprintf("config.%s.toml", dotenv.Get("APP_ENV", "dev")))
+		if err := serve.LoadExists(path.Join(app.Workspace(), "config.toml"), path.Join(app.Workspace(), envConfFile)); err != nil {
+			return err
+		}
+		break
+	case DrvApollo:
+		apolloServerURL := dotenv.Get("APOLLO_SERVER_URL", "")
+		apolloAppId := dotenv.Get("APOLLO_APP_ID", "")
+		apolloAccessKey := dotenv.Get("APOLLO_ACCESS_KEY")
+		apollo, err := agollo.New(
+			apolloServerURL, apolloAppId,
+			agollo.Cluster(envConf),
+			agollo.AutoFetchOnCacheMiss(),
+			agollo.AccessKey(apolloAccessKey),
+			agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
+			agollo.PreloadNamespaces("application"),
+		)
+		if err != nil {
+			return err
+		}
 
-	if err := serve.LoadExists(path.Join(app.Workspace(), "config.toml"), path.Join(app.Workspace(), envConfFile)); err != nil {
-		return err
+		var loadConf = func(kv agollo.Configurations) {
+			for k, value := range kv {
+				serve.Set(k, value, true)
+			}
+		}
+
+		loadConf(apollo.GetNameSpace("application"))
+
+		errCh := apollo.Start()
+		watchCh := apollo.Watch()
+
+		go func() {
+			for {
+				select {
+				case err := <-errCh:
+					log.Panic(err)
+				case resp := <-watchCh:
+					loadConf(resp.NewValue)
+				}
+			}
+		}()
+		break
 	}
 
 	app.AddCommanders(contracts.FuncCommander(Command))

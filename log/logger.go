@@ -71,6 +71,10 @@ func Fatalf(format string, args ...interface{}) {
 	log.Logger.WithOptions(zap.AddCallerSkip(1)).Sugar().Fatalf(format, args...)
 }
 
+func Sugar() *zap.SugaredLogger {
+	return log.Logger.WithOptions(zap.AddCallerSkip(1)).Sugar()
+}
+
 func NewLogger(app contracts.Application, conf contracts.Config) *Logger {
 	log = new(Logger)
 	log.conf = conf
@@ -80,6 +84,7 @@ func NewLogger(app contracts.Application, conf contracts.Config) *Logger {
 }
 
 func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
+	var encoder zapcore.Encoder
 	conf := zapcore.EncoderConfig{
 		TimeKey:    "time",
 		LevelKey:   "level",
@@ -93,34 +98,49 @@ func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.FullCallerEncoder,
 	}
+
 	if logger.conf.Bool("logger.color", true) {
 		conf.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
-	encoder := zapcore.NewConsoleEncoder(conf)
 
-	infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl < zapcore.WarnLevel && lvl >= level
-	})
+	output := path.Join(logger.app.Storage(), logger.conf.String("logger.output_path", "logs"))
 
-	warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-		return lvl >= zapcore.WarnLevel && lvl >= level
-	})
+	if logger.conf.String("app.env", "production") == "production" {
+		conf.EncodeLevel = zapcore.CapitalLevelEncoder
+		encoder = zapcore.NewJSONEncoder(conf)
+	} else {
+		encoder = zapcore.NewConsoleEncoder(conf)
+	}
 
-	infoLevelWriter := logger.getLevelWriter("./info")
-	warnLevelWriter := logger.getLevelWriter("./warn")
+	coreTee := []zapcore.Core{
+		zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(
+			zapcore.AddSync(logger.getLevelWriter(path.Join(output, "logger"))),
+			zapcore.AddSync(os.Stdout),
+		), level),
+	}
 
-	core := zapcore.NewTee(
-		zapcore.NewCore(encoder, zapcore.AddSync(infoLevelWriter), infoLevel),
-		zapcore.NewCore(encoder, zapcore.AddSync(warnLevelWriter), warnLevel),
-		zapcore.NewCore(zapcore.NewConsoleEncoder(conf), zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout)), level),
-	)
+	if logger.conf.Bool("logger.multi_level_output", true) {
+		infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+			return lvl < zapcore.WarnLevel && lvl >= level
+		})
+		infoLevelWriter := logger.getLevelWriter(path.Join(output, "info"))
+
+		warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+			return lvl >= zapcore.WarnLevel && lvl >= level
+		})
+		warnLevelWriter := logger.getLevelWriter(path.Join(output, "warn"))
+		coreTee = append(coreTee, zapcore.NewCore(encoder, zapcore.AddSync(infoLevelWriter), infoLevel))
+		coreTee = append(coreTee, zapcore.NewCore(encoder, zapcore.AddSync(warnLevelWriter), warnLevel))
+	}
+
+	core := zapcore.NewTee(coreTee...)
 	return zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.WarnLevel))
 }
 
 func (logger *Logger) getLevelWriter(filename string) io.Writer {
 	hook, err := rotatelogs.New(
-		path.Join(logger.app.Storage(), filename+"-%Y-%m-%d.log"),
-		rotatelogs.WithLinkName(path.Join(logger.app.Storage(), filename+".log")),
+		filename+"-%Y-%m-%d.log",
+		rotatelogs.WithLinkName(filename+".log"),
 		rotatelogs.WithMaxAge(time.Hour*24*30),
 		rotatelogs.WithRotationTime(time.Hour*24),
 	)

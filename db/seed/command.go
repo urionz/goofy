@@ -4,6 +4,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/gookit/gcli/v3"
 	"github.com/urionz/color"
+	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/contracts"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -52,10 +53,13 @@ func SwitchDBConnection(app contracts.Application) error {
 	return nil
 }
 
-func Seed(app contracts.Application) *gcli.Command {
-	command := &gcli.Command{
+func Seed(app contracts.Application) *command.Command {
+	cmd := &command.Command{
 		Name: "db-seed",
 		Desc: "生成数据",
+		Config: func(c *command.Command) {
+			c.StrOpt(&driver, "conn", "", "", "指定数据库连接")
+		},
 		Func: func(cmd *gcli.Command, args []string) error {
 			if err := SwitchDBConnection(app); err != nil {
 				color.Warnln(err)
@@ -70,5 +74,5 @@ func Seed(app contracts.Application) *gcli.Command {
 			return nil
 		},
 	}
-	return command
+	return cmd
 }

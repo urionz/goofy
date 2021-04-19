@@ -41,6 +41,8 @@ func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.Js
 		log.Error(err)
 		return web.JsonError(err)
 	}
+	log.Error("test error")
+	log.Infof("hahaha test infgo")
 	fmt.Println(req.Files)
 	return web.JsonSuccess()
 }

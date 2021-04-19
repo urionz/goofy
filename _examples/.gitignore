@@ -2,3 +2,4 @@ database
 storage
 *.toml
 .env
+.*

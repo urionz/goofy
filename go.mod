@@ -22,6 +22,7 @@ require (
 	github.com/lestrrat-go/strftime v1.0.4 // indirect
 	github.com/mattn/go-runewidth v0.0.10 // indirect
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/shima-park/agollo v1.2.10
 	github.com/stretchr/testify v1.7.0
 	github.com/urionz/collection v1.3.3
 	github.com/urionz/color v1.3.9

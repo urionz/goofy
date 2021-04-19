@@ -10,6 +10,7 @@ import (
 	"github.com/kataras/iris/v12/middleware/logger"
 	irisRecover "github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/middleware/requestid"
+	"github.com/urionz/color"
 	"github.com/urionz/goofy/command"
 	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
@@ -23,6 +24,8 @@ func init() {
 [http]
 # web监听端口
 port = 4000
+# 是否开启接入日志
+access_log = true
 `)
 }
 
@@ -67,6 +70,18 @@ func (e *engine) Handle(app contracts.Application) *command.Command {
 				e.Logger().SetLevel("debug")
 				e.Logger().SetOutput(os.Stdout)
 			}
+			if conf.Bool("http.access_log", true) {
+				ac := makeAccessLog(app.Storage(), conf)
+				e.UseRouter(ac.Handler)
+			}
+
+			color.Println("<green>[INFO] </>",
+				fmt.Sprintf(
+					"======================== WebEngine (Port: %d, AppName: %s, EnvName: %s, Debug: %t) ========================\n",
+					e.port, e.name, conf.String("app.env", "production"), e.debug,
+				),
+			)
+
 			return e.Listen(
 				addr, iris.WithOptimizations,
 				iris.WithRemoteAddrPrivateSubnet("192.168.0.0", "192.168.255.255"),
