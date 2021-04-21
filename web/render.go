@@ -42,7 +42,7 @@ func JsonData(data interface{}) *JsonResult {
 func JsonPageData(results interface{}, page *pagination.Paging) *JsonResult {
 	return JsonData(&pagination.PageResult{
 		Results: results,
-		Page:    page,
+		Paging:  page,
 	})
 }
 
@@ -57,7 +57,7 @@ func JsonPageMapData(results interface{}, page interface{}) *JsonResult {
 	}
 	return JsonData(&pagination.PageResult{
 		Results: results,
-		Page:    &paging,
+		Paging:  &paging,
 	})
 }
 
