@@ -38,7 +38,7 @@ type OrderByCol struct {
 }
 
 type PageResult struct {
-	*Paging `json:"page"`
+	*Paging
 	Results interface{} `json:"results"`
 }
 
