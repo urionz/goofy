@@ -105,6 +105,12 @@ func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
 
 	output := path.Join(logger.app.Storage(), logger.conf.String("logger.output_path", "logs"))
 
+	absOutput := logger.conf.String("logger.output_path_abs")
+
+	if absOutput != "" {
+		output = absOutput
+	}
+
 	if logger.conf.String("app.env", "production") == "production" {
 		conf.EncodeLevel = zapcore.CapitalLevelEncoder
 		encoder = zapcore.NewJSONEncoder(conf)

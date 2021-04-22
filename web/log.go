@@ -28,7 +28,7 @@ func makeAccessLog(root string, conf contracts.Config) *accesslog.AccessLog {
 		}
 	})
 	if conf.String("app.env", "production") == "production" {
-		ac.SetFormatter(&accesslog.JSON{Indent: "  "})
+		ac.SetFormatter(&accesslog.JSON{})
 	}
 
 	return ac

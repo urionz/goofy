@@ -9,7 +9,7 @@ func init() {
 # 日志配置
 [logger]
 # 是否开启日志输出
-log.output_enable = true
+output_enable = true
 # 日志等级   debug|info|warn|error|panic|fatal
 level = "debug"
 # 时间格式
