@@ -53,5 +53,5 @@ func NewServiceProvider(app contracts.Application, conf contracts.Config) error 
 		contracts.FuncCommander(model.MakeService),
 	)
 	instance = NewManager(conf)
-	return app.ProvideValue(instance, di.As(new(contracts.DBFactory)))
+	return app.ProvideValue(instance, di.As(new(contracts.DBFactory), new(contracts.DynamicConf)))
 }

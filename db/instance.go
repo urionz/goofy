@@ -17,8 +17,8 @@ func Truncate(model schema.Tabler, db *DB) error {
 	return db.Exec(fmt.Sprintf("TRUNCATE TABLE %s", model.TableName())).Error
 }
 
-func Default() *DB {
-	return instance.Connection()
+func Conn(conn ...string) *DB {
+	return instance.Connection(conn...)
 }
 
 func M() *Manager {
@@ -26,7 +26,7 @@ func M() *Manager {
 }
 
 func Tx(txFunc func(tx *DB) error, connections ...*DB) (err error) {
-	conn := Default()
+	conn := Conn()
 	if len(connections) > 0 && connections[0] != nil {
 		conn = connections[0]
 	}
@@ -51,7 +51,7 @@ func Tx(txFunc func(tx *DB) error, connections ...*DB) (err error) {
 }
 
 func GetAllTable(connections ...*DB) []string {
-	conn := Default()
+	conn := Conn()
 	if len(connections) > 0 && connections[0] != nil {
 		conn = connections[0]
 	}
@@ -63,7 +63,7 @@ func GetAllTable(connections ...*DB) []string {
 }
 
 func DropAllTable(connections ...*DB) error {
-	conn := Default()
+	conn := Conn()
 	if len(connections) > 0 && connections[0] != nil {
 		conn = connections[0]
 	}

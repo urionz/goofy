@@ -77,6 +77,10 @@ func Sugar() *zap.SugaredLogger {
 	return log.Logger.WithOptions(zap.AddCallerSkip(1)).Sugar()
 }
 
+func Log() *Logger {
+	return log
+}
+
 func GetRotateWriter(filename string) io.Writer {
 	return log.getRotateWriter(filename)
 }
@@ -150,6 +154,10 @@ func (logger *Logger) newZapLogger() *zap.Logger {
 
 	core := zapcore.NewTee(coreTee...)
 	return zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.WarnLevel))
+}
+
+func (logger *Logger) Printf(f string, args ...interface{}) {
+	logger.Logger.WithOptions(zap.WithCaller(false)).Sugar().Infof(f, args...)
 }
 
 func (logger *Logger) DynamicConf(_ contracts.Application, conf contracts.Config) error {

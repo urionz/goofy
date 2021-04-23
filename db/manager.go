@@ -3,17 +3,15 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"io"
-	"log"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/log"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormLogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -30,6 +28,24 @@ func NewManager(conf contracts.Config) *Manager {
 	return &Manager{
 		conf: conf,
 	}
+}
+
+func (m *Manager) DynamicConf(_ contracts.Application, conf contracts.Config) error {
+	m.connections.Range(func(key, value interface{}) bool {
+		c := conf.Object(fmt.Sprintf("database.conns.%s", key))
+		if db, ok := value.(*gorm.DB); ok {
+			db.Logger = gormLogger.New(
+				log.Log(),
+				gormLogger.Config{
+					SlowThreshold: time.Duration(c.Int("slow_threshold", 100)) * time.Millisecond,
+					LogLevel:      m.parseLogLevel(c.String("log_level", conf.String("database.log_level", conf.String("logger.level", "debug")))),
+					Colorful:      c.Bool("log_color", conf.Bool("database.log_color", conf.Bool("logger.color", true))),
+				},
+			)
+		}
+		return true
+	})
+	return nil
 }
 
 func (m *Manager) Connection(names ...string) *gorm.DB {
@@ -54,9 +70,6 @@ func (m *Manager) Connection(names ...string) *gorm.DB {
 func (m *Manager) resolve(name string) (conn *gorm.DB, err error) {
 	var db *sql.DB
 	conf := m.getConfig(name)
-	writes := []io.Writer{
-		os.Stdout,
-	}
 	if conn, err = gorm.Open(mysql.Open(
 		fmt.Sprintf(
 			"%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
@@ -72,9 +85,9 @@ func (m *Manager) resolve(name string) (conn *gorm.DB, err error) {
 			TablePrefix:   conf.String("prefix", ""),
 			SingularTable: conf.Bool("singular_table", false),
 		},
-		Logger: logger.New(
-			log.New(io.MultiWriter(writes...), "\r\n", log.LstdFlags),
-			logger.Config{
+		Logger: gormLogger.New(
+			log.Log(),
+			gormLogger.Config{
 				SlowThreshold: time.Duration(conf.Int("slow_threshold", 100)) * time.Millisecond,
 				LogLevel:      m.parseLogLevel(conf.String("log_level", m.conf.String("database.log_level", m.conf.String("logger.level", "debug")))),
 				Colorful:      conf.Bool("log_color", m.conf.Bool("database.log_color", m.conf.Bool("logger.color", true))),
@@ -101,20 +114,20 @@ func (m *Manager) getConfig(name string) contracts.Config {
 	return m.conf.Object(fmt.Sprintf("database.conns.%s", name))
 }
 
-func (m *Manager) parseLogLevel(level string) logger.LogLevel {
+func (m *Manager) parseLogLevel(level string) gormLogger.LogLevel {
 	switch level {
 	case contracts.DebugLevel:
-		return logger.Info
+		return gormLogger.Info
 	case contracts.ErrorLevel:
-		return logger.Error
+		return gormLogger.Error
 	case contracts.InfoLevel:
-		return logger.Info
+		return gormLogger.Info
 	case contracts.WarnLevel:
-		return logger.Warn
+		return gormLogger.Warn
 	case contracts.PanicLevel:
-		return logger.Error
+		return gormLogger.Error
 	case contracts.FatalLevel:
-		return logger.Error
+		return gormLogger.Error
 	}
-	return logger.Info
+	return gormLogger.Info
 }
