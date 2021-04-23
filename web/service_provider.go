@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -15,6 +16,7 @@ import (
 	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/filesystem"
+	"github.com/urionz/goofy/log"
 	"github.com/urionz/goofy/web/middleware"
 )
 
@@ -33,23 +35,45 @@ func NewServiceProvider(app contracts.Application, store *filesystem.Manager) er
 	webEngine := iris.New()
 	ctn := webEngine.ConfigureContainer()
 	ctn.Use(requestid.New(), irisRecover.New(), logger.New(), middleware.InjectWebContext(store))
-	app.AddCommanders(&engine{
+	server := &Server{
 		Application: webEngine,
-	})
-	if err := app.ProvideValue(webEngine, container.Tags{"name": "web"}); err != nil {
+	}
+	app.AddCommanders(server)
+	if err := app.ProvideValue(server, container.Tags{"name": "web"}, container.As(new(contracts.DynamicConf))); err != nil {
 		return err
 	}
 	return app.ProvideValue(ctn, container.Tags{"name": "router"})
 }
 
-type engine struct {
-	name  string
-	debug bool
-	port  int
+type Server struct {
+	name      string
+	port      int
+	accessLog bool
 	*iris.Application
 }
 
-func (e *engine) Handle(app contracts.Application) *command.Command {
+func (e *Server) DynamicConf(_ contracts.Application, conf contracts.Config) error {
+	e.accessLog = conf.Bool("http.access_log", false)
+	e.SetName(conf.String("app.name", e.name))
+	e.SetLevel(conf.String("logger.level", "info"))
+	e.Logger().SetOutput(io.MultiWriter(log.GetRotateWriter("logger"), os.Stdout))
+
+	if conf.String("app.env", "production") == "production" {
+		e.Logger().SetFormat("json")
+	}
+
+	return nil
+}
+
+func (e *Server) SetLevel(level string) {
+	e.Logger().SetLevel(level)
+}
+
+func (e *Server) SetName(name string) {
+	e.Application.SetName(name)
+}
+
+func (e *Server) Handle(app contracts.Application) *command.Command {
 	var conf contracts.Config
 	if err := app.Resolve(&conf); err != nil {
 		panic(err)
@@ -59,31 +83,34 @@ func (e *engine) Handle(app contracts.Application) *command.Command {
 		Aliases: []string{"http"},
 		Desc:    "开启http服务",
 		Config: func(c *command.Command) {
+			c.BoolOpt(&e.accessLog, "log", "", conf.Bool("http.access_log", false), "是否开启接入日志")
 			c.StrOpt(&e.name, "name", "n", conf.String("app.name", "web"), "web应用名称")
-			c.BoolOpt(&e.debug, "debug", "d", conf.Bool("app.debug", false), "是否开启web调试")
 			c.IntOpt(&e.port, "port", "p", conf.Int("http.port", 3000), "web服务监听端口")
 		},
 		Func: func(c *command.Command, args []string) error {
 			addr := fmt.Sprintf("0.0.0.0:%d", e.port)
-			e.SetName(e.name)
-			if e.debug {
-				e.Logger().SetLevel("debug")
-				e.Logger().SetOutput(os.Stdout)
-			}
-			if conf.Bool("http.access_log", true) {
-				ac := makeAccessLog(app.Storage(), conf)
-				e.UseRouter(ac.Handler)
+
+			e.UseRouter(iris.NewConditionalHandler(func(ctx iris.Context) bool {
+				return e.accessLog
+			}, makeAccessLog(conf).Handler))
+
+			if err := e.DynamicConf(app, conf); err != nil {
+				log.Error(err)
+				return err
 			}
 
 			color.Println("<green>[INFO] </>",
 				fmt.Sprintf(
-					"======================== WebEngine (Port: %d, AppName: %s, EnvName: %s, Debug: %t) ========================\n",
-					e.port, e.name, conf.String("app.env", "production"), e.debug,
+					"======================== WebEngine (Port: %d, AppName: %s, EnvName: %s) ========================\n",
+					e.port, e.name, conf.String("app.env", "production"),
 				),
 			)
 
 			return e.Listen(
 				addr, iris.WithOptimizations,
+				iris.WithConfiguration(iris.Configuration{
+					DisableStartupLog: true,
+				}),
 				iris.WithRemoteAddrPrivateSubnet("192.168.0.0", "192.168.255.255"),
 				iris.WithRemoteAddrPrivateSubnet("10.0.0.0", "10.255.255.255"),
 			)

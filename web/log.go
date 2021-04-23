@@ -3,21 +3,15 @@ package web
 import (
 	"io"
 	"os"
-	"path"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/accesslog"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/log"
 )
 
-func makeAccessLog(root string, conf contracts.Config) *accesslog.AccessLog {
-	output := path.Join(root, conf.String("logger.output_path", "logs"))
-	w, err := rotatelogs.New(path.Join(output, "web-%Y-%m-%d.log"))
-	if err != nil {
-		panic(err)
-	}
-	ac := accesslog.New(io.MultiWriter(w, os.Stdout))
+func makeAccessLog(conf contracts.Config) *accesslog.AccessLog {
+	ac := accesslog.New(io.MultiWriter(log.GetRotateWriter("logger"), os.Stdout))
 	ac.BytesSent = false
 	ac.AddFields(func(ctx iris.Context, fields *accesslog.Fields) {
 		fields.Set("request_id", ctx.GetID())
@@ -27,8 +21,11 @@ func makeAccessLog(root string, conf contracts.Config) *accesslog.AccessLog {
 			}
 		}
 	})
+
 	if conf.String("app.env", "production") == "production" {
-		ac.SetFormatter(&accesslog.JSON{})
+		ac.SetFormatter(&accesslog.JSON{
+			HumanTime: true,
+		})
 	}
 
 	return ac

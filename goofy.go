@@ -73,6 +73,15 @@ func New(options ...Option) *Application {
 	return app
 }
 
+func (app *Application) DynamicConf(conf contracts.Config) error {
+	var services []contracts.DynamicConf
+	return app.Container.Iterate(&services, func(tags di.Tags, loader di.ValueFunc) error {
+		i, _ := loader()
+		i.(contracts.DynamicConf).DynamicConf(app, conf)
+		return nil
+	})
+}
+
 func (app *Application) Storage() string {
 	return path.Join(app.Workspace(), "storage")
 }

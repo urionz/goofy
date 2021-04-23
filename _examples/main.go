@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"mime/multipart"
 
 	"github.com/kataras/iris/v12"
@@ -41,9 +40,12 @@ func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.Js
 		log.Error(err)
 		return web.JsonError(err)
 	}
+	// var webServer *web.Server
+	// goofy.Default.SetLevel("info")
+	// webServer.SetLevel("info")
 	log.Error("test error")
 	log.Infof("hahaha test infgo")
-	fmt.Println(req.Files)
+	log.Warn("warn")
 	return web.JsonSuccess()
 }
 

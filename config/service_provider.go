@@ -6,6 +6,7 @@ import (
 	"path"
 
 	"github.com/shima-park/agollo"
+	"github.com/urionz/color"
 	"github.com/urionz/config"
 	"github.com/urionz/config/hcl"
 	"github.com/urionz/config/ini"
@@ -82,7 +83,11 @@ func NewServiceProvider(app contracts.Application) error {
 				case err := <-errCh:
 					log.Panic(err)
 				case resp := <-watchCh:
+					color.Warnln("配置文件被更新")
 					loadConf(resp.NewValue)
+					if err := app.DynamicConf(serve); err != nil {
+						log.Panic(err)
+					}
 				}
 			}
 		}()

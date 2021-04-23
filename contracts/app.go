@@ -27,6 +27,7 @@ type Application interface {
 	Provide(constructor di.Constructor, options ...di.ProvideOption) error
 	Resolve(ptr di.Pointer, options ...di.ResolveOption) error
 	Call(name string, args ...string) error
+	DynamicConf(conf Config) error
 
 	Workspace() string
 	Dir() string
@@ -34,4 +35,8 @@ type Application interface {
 	Database() string
 	Run() Application
 	Error() error
+}
+
+type DynamicConf interface {
+	DynamicConf(app Application, conf Config) error
 }

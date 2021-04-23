@@ -17,8 +17,10 @@ type Logger struct {
 	di.Tags `name:"logger"`
 
 	*zap.Logger
-	conf contracts.Config
-	app  contracts.Application
+	atomic zap.AtomicLevel
+	conf   contracts.Config
+	app    contracts.Application
+	output string
 }
 
 var log *Logger
@@ -75,15 +77,25 @@ func Sugar() *zap.SugaredLogger {
 	return log.Logger.WithOptions(zap.AddCallerSkip(1)).Sugar()
 }
 
+func GetRotateWriter(filename string) io.Writer {
+	return log.getRotateWriter(filename)
+}
+
 func NewLogger(app contracts.Application, conf contracts.Config) *Logger {
 	log = new(Logger)
 	log.conf = conf
 	log.app = app
-	log.Logger = log.newZapLogger(log.parseLogLevel(conf.String("logger.level", "debug")))
+	output := path.Join(app.Storage(), conf.String("logger.output_path", "logs"))
+	absOutput := conf.String("logger.output_path_abs")
+	if absOutput != "" {
+		output = absOutput
+	}
+	log.output = output
+	log.Logger = log.newZapLogger()
 	return log
 }
 
-func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
+func (logger *Logger) newZapLogger() *zap.Logger {
 	var encoder zapcore.Encoder
 	conf := zapcore.EncoderConfig{
 		TimeKey:    "time",
@@ -103,14 +115,6 @@ func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
 		conf.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	output := path.Join(logger.app.Storage(), logger.conf.String("logger.output_path", "logs"))
-
-	absOutput := logger.conf.String("logger.output_path_abs")
-
-	if absOutput != "" {
-		output = absOutput
-	}
-
 	if logger.conf.String("app.env", "production") == "production" {
 		conf.EncodeLevel = zapcore.CapitalLevelEncoder
 		encoder = zapcore.NewJSONEncoder(conf)
@@ -118,23 +122,28 @@ func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
 		encoder = zapcore.NewConsoleEncoder(conf)
 	}
 
+	logger.atomic = zap.NewAtomicLevel()
+
+	logger.DynamicConf(logger.app, logger.conf)
+
 	coreTee := []zapcore.Core{
 		zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(
-			zapcore.AddSync(logger.getLevelWriter(path.Join(output, "logger"))),
+			zapcore.AddSync(logger.getRotateWriter("logger")),
 			zapcore.AddSync(os.Stdout),
-		), level),
+		), logger.atomic),
 	}
 
 	if logger.conf.Bool("logger.multi_level_output", true) {
 		infoLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-			return lvl < zapcore.WarnLevel && lvl >= level
+			return lvl < zapcore.WarnLevel && lvl >= logger.atomic.Level()
 		})
-		infoLevelWriter := logger.getLevelWriter(path.Join(output, "info"))
+
+		infoLevelWriter := logger.getRotateWriter("info")
 
 		warnLevel := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
-			return lvl >= zapcore.WarnLevel && lvl >= level
+			return lvl >= zapcore.WarnLevel && lvl >= logger.atomic.Level()
 		})
-		warnLevelWriter := logger.getLevelWriter(path.Join(output, "warn"))
+		warnLevelWriter := logger.getRotateWriter("warn")
 		coreTee = append(coreTee, zapcore.NewCore(encoder, zapcore.AddSync(infoLevelWriter), infoLevel))
 		coreTee = append(coreTee, zapcore.NewCore(encoder, zapcore.AddSync(warnLevelWriter), warnLevel))
 	}
@@ -143,12 +152,24 @@ func (logger *Logger) newZapLogger(level zapcore.Level) *zap.Logger {
 	return zap.New(core, zap.AddCaller(), zap.AddStacktrace(zap.WarnLevel))
 }
 
-func (logger *Logger) getLevelWriter(filename string) io.Writer {
+func (logger *Logger) DynamicConf(_ contracts.Application, conf contracts.Config) error {
+	logger.SetLevel(conf.String("logger.level", "debug"))
+	return nil
+}
+
+func (logger *Logger) SetLevel(level string) {
+	logger.atomic.SetLevel(logger.parseLogLevel(level))
+}
+
+func (logger *Logger) getRotateWriter(filename string) io.Writer {
+	maxAge, _ := time.ParseDuration(logger.conf.String("logger.rotate.max_age", "240h"))
+	period, _ := time.ParseDuration(logger.conf.String("logger.rotate.period", "24h"))
+	filename = path.Join(logger.output, filename)
 	hook, err := rotatelogs.New(
 		filename+"-%Y-%m-%d.log",
 		rotatelogs.WithLinkName(filename+".log"),
-		rotatelogs.WithMaxAge(time.Hour*24*30),
-		rotatelogs.WithRotationTime(time.Hour*24),
+		rotatelogs.WithMaxAge(maxAge),
+		rotatelogs.WithRotationTime(period),
 	)
 	if err != nil {
 		panic(err)
