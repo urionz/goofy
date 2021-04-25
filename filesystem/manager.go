@@ -32,6 +32,11 @@ func NewManager(conf contracts.Config) *Manager {
 	}
 }
 
+func (m *Manager) DynamicConf(_ contracts.Application, conf contracts.Config) error {
+	m.conf = conf
+	return nil
+}
+
 func (m *Manager) Disk(names ...string) contracts.Filesystem {
 	driver := m.getDefaultDriver()
 	if len(names) > 0 && names[0] != "" {

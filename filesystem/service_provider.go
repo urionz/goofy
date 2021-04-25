@@ -25,7 +25,7 @@ func NewServiceProvider(app contracts.Application, conf contracts.Config) error 
 	}
 	provide(NewFilesystem())
 	instance = NewManager(conf)
-	provide(instance)
+	provide(instance, di.As(new(contracts.DynamicConf)))
 
 	if err = app.Provide(func(filesystem *Manager, conf contracts.Config) contracts.Filesystem {
 		return filesystem.Disk(conf.String("filesystems.default"))
