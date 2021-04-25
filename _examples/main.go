@@ -1,15 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"mime/multipart"
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
 	"github.com/urionz/goofy/contracts"
-	"github.com/urionz/goofy/db"
-	"github.com/urionz/goofy/db/model"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
@@ -30,15 +27,6 @@ func main() {
 type Test struct {
 }
 
-type TestTable struct {
-	model.BaseModel
-	Id int
-}
-
-func (*TestTable) TableName() string {
-	return "test"
-}
-
 type Req struct {
 	Files    []*multipart.FileHeader `valid:"mime(image/png)~错误" form:"file[]"`
 	Name     string                  `valid:"optional~名称不存在" form:"name"`
@@ -51,8 +39,6 @@ func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.Js
 	// 	log.Error(err)
 	// 	return web.JsonError(err)
 	// }
-	var m []TestTable
-	fmt.Println(db.Model(&TestTable{}).Find(&m).Error, "0--------")
 
 	return web.JsonSuccess()
 }
