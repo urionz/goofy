@@ -57,7 +57,7 @@ func (v *Validation) Register() {
 		}
 
 		for _, filename := range filenames {
-			if !arrutil.StringsHas(shouldExt, filepath.Ext(filename)) {
+			if !arrutil.StringsHas(shouldExt, strings.ToLower(strings.TrimLeft(filepath.Ext(filename), "."))) {
 				return false
 			}
 		}
@@ -93,7 +93,7 @@ func (v *Validation) Register() {
 			}
 		}
 
-		if arrutil.StringsHas(shouldMimes, mime) {
+		if arrutil.StringsHas(shouldMimes, strings.ToLower(mime)) {
 			return true
 		}
 
