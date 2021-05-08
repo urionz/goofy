@@ -154,7 +154,6 @@ func Migrate(app contracts.Application) *command.Command {
 				return nil
 			}
 
-			changeDir(path.Join(app.Database(), "migrations"))
 			if err := RunMigrate(step); err != nil {
 				color.Warnln(err)
 				return nil
