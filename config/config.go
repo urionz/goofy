@@ -52,6 +52,10 @@ func LoadExists(files ...string) error {
 	return serve.LoadExists(files...)
 }
 
+func Data() map[string]interface{} {
+	return serve.Data()
+}
+
 func Get(key string, findByPath ...bool) interface{} {
 	return serve.Get(key, findByPath...)
 }
