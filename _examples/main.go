@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"mime/multipart"
 
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/web"
@@ -14,12 +14,13 @@ import (
 
 func main() {
 	goofy.Default.AddServices(
-		func(router *iris.APIContainer, app contracts.Application) {
-			router.PartyFunc("/", func(router *iris.APIContainer) {
-				router.PartyFunc("/idol", func(route *iris.APIContainer) {
-					mvc.New(route.Self).Handle(new(Test))
-				})
-			})
+		func(router *iris.APIContainer, app contracts.Application, conf contracts.Config) {
+			fmt.Println(conf.Data())
+			// router.PartyFunc("/", func(router *iris.APIContainer) {
+			// 	router.PartyFunc("/idol", func(route *iris.APIContainer) {
+			// 		mvc.New(route.Self).Handle(new(Test))
+			// 	})
+			// })
 		},
 	).Run()
 }

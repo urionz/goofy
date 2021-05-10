@@ -51,6 +51,10 @@ func (r *RedisStore) Forever(key string, value interface{}) error {
 	return r.Connection().Set(key, value, 0)
 }
 
+func (r *RedisStore) Forget(key string) error {
+	return r.Connection().Del(key)
+}
+
 func (r *RedisStore) Tags(names ...string) (contracts.TaggableStore, error) {
 	return NewRedisTaggedCache(r, NewTagSet(r, names...)), nil
 }

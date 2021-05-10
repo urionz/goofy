@@ -60,7 +60,6 @@ func NewServiceProvider(app contracts.Application) error {
 			agollo.AutoFetchOnCacheMiss(),
 			agollo.AccessKey(apolloAccessKey),
 			agollo.WithLogger(agollo.NewLogger(agollo.LoggerWriter(os.Stdout))),
-			agollo.PreloadNamespaces("application"),
 		)
 		if err != nil {
 			return err

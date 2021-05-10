@@ -45,3 +45,12 @@ func (conn *Connection) SetEX(key string, value interface{}, expiration time.Dur
 func (conn *Connection) SAdd(key string, members ...interface{}) error {
 	return conn.client.SAdd(context.Background(), key, members...).Err()
 }
+
+func (conn *Connection) Del(keys ...string) error {
+	for _, key := range keys {
+		if err := conn.client.Del(context.Background(), key).Err(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
