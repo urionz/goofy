@@ -606,7 +606,7 @@ func RollbackMigrations(migrations []*Model) error {
 		for _, migrateFile := range files {
 			migrationNames := strings.Split(reflect.TypeOf(migrateFile).String(), ".")
 			migrationName := strutil.ToSnake(migrationNames[len(migrationNames)-1])
-			if dbMigrate.Migration == migrationName {
+			if dbMigrate.Migration == fmt.Sprintf("%d_%s", migrateFile.MigrateTimestamp(), migrationName) {
 				return migrateFile, true
 			}
 		}
@@ -649,11 +649,4 @@ func RunDown(file contracts.MigrateFile, migration *Model) (err error) {
 	color.Infoln("Rolled back:", name)
 
 	return nil
-}
-
-func changeDir(dir string) {
-	if err := os.Chdir(dir); err != nil {
-		color.Errorln(err)
-		os.Exit(0)
-	}
 }
