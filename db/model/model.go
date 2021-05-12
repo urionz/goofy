@@ -98,6 +98,9 @@ func (t FmtTime) Normalize(layout ...string) string {
 }
 
 func (t FmtTime) Value() (driver.Value, error) {
+	if !t.Valid {
+		return nil, nil
+	}
 	var zeroTime time.Time
 	if t.Time.UnixNano() == zeroTime.UnixNano() {
 		return nil, nil
@@ -106,10 +109,11 @@ func (t FmtTime) Value() (driver.Value, error) {
 }
 
 func (t *FmtTime) Scan(v interface{}) error {
-	value, ok := v.(time.Time)
-	if ok {
-		*t = FmtTime{Time: value}
-		return nil
-	}
-	return fmt.Errorf("can not convert %v to timestamp", v)
+	return (*sql.NullTime)(t).Scan(v)
+	// value, ok := v.(time.Time)
+	// if ok {
+	// 	*t = FmtTime{Time: value}
+	// 	return nil
+	// }
+	// return fmt.Errorf("can not convert %v to timestamp", v)
 }
