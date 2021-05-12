@@ -96,12 +96,13 @@ func (t *FmtTime) UnmarshalJSON(b []byte) error {
 		t.Valid = false
 		return nil
 	}
+	t.Time = carbon.ParseByFormat("2006-01-02 15:04:05", "2006-01-02 15:04:05").Time
 	parsed := carbon.ParseByFormat(string(b), "2006-01-02 15:04:05")
+	t.Valid = true
 	if parsed.Error == nil {
 		t.Time = parsed.Time
-		t.Valid = true
 	}
-	return parsed.Error
+	return nil
 }
 
 func (t FmtTime) Normalize(layout ...string) string {
