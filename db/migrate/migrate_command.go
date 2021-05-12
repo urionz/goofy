@@ -3,6 +3,7 @@ package migrate
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"html/template"
 	"os"
 	"path"
@@ -505,7 +506,7 @@ func RunUp(file contracts.MigrateFile, batch int) error {
 	if err := file.Up(conn); err != nil {
 		return err
 	}
-	if err := repository.Log(name, batch); err != nil {
+	if err := repository.Log(fmt.Sprintf("%d_%s", file.MigrateTimestamp(), name), batch); err != nil {
 		return err
 	}
 
