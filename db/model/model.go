@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-module/carbon"
 	"github.com/urionz/goofy/contracts"
 )
 
@@ -95,11 +96,12 @@ func (t *FmtTime) UnmarshalJSON(b []byte) error {
 		t.Valid = false
 		return nil
 	}
-	err := json.Unmarshal(b, &t.Time)
-	if err == nil {
+	parsed := carbon.ParseByFormat(string(b), "2006-01-02 15:04:05")
+	if parsed.Error == nil {
+		t.Time = parsed.Time
 		t.Valid = true
 	}
-	return err
+	return parsed.Error
 }
 
 func (t FmtTime) Normalize(layout ...string) string {
