@@ -6,7 +6,8 @@ import (
 
 	"github.com/kataras/iris/v12"
 	"github.com/urionz/goofy"
-	"github.com/urionz/goofy/contracts"
+	"github.com/urionz/goofy/cache"
+	"github.com/urionz/goofy/redis"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
@@ -14,8 +15,16 @@ import (
 
 func main() {
 	goofy.Default.AddServices(
-		func(router *iris.APIContainer, app contracts.Application, conf contracts.Config) {
-			fmt.Println(conf.Data())
+		func(rdm *redis.Manager, cm *cache.Manager) {
+			var m string
+			fmt.Println(cm.Driver().Sear("testfunc", func() interface{} {
+				return "value....."
+			}, &m))
+			var mm string
+			cm.Driver().Scan("testfunc", &mm)
+			fmt.Println(m, mm)
+			// conn, _ := rdm.Connection()
+			// fmt.Println(conn.Set("testset", "testvalue", 0))
 			// router.PartyFunc("/", func(router *iris.APIContainer) {
 			// 	router.PartyFunc("/idol", func(route *iris.APIContainer) {
 			// 		mvc.New(route.Self).Handle(new(Test))

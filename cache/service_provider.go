@@ -1,9 +1,6 @@
 package cache
 
 import (
-	"path"
-	"runtime"
-
 	"github.com/urionz/goofy/container"
 	"github.com/urionz/goofy/contracts"
 )
@@ -37,10 +34,6 @@ prefix = ""
 }
 
 func NewServiceProvider(app contracts.Application, conf contracts.Config) error {
-	_, f, _, _ := runtime.Caller(0)
-	if err := conf.LoadExists(path.Join(path.Dir(f), "cache.toml")); err != nil {
-		return err
-	}
 	instance = NewManager(app, conf)
 	if err := app.ProvideValue(instance, container.As(new(contracts.CacheFactory))); err != nil {
 		return err

@@ -134,7 +134,7 @@ func (repo *Repository) RememberForever(key string, callback contracts.CacheClos
 	if err := jsonutil.Decode(b, ptr); err != nil {
 		return err
 	}
-	if err := repo.Forever(key, ptr); err != nil {
+	if err := repo.Forever(key, string(b)); err != nil {
 		return err
 	}
 
