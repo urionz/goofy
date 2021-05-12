@@ -2,6 +2,7 @@ package model
 
 import (
 	"bytes"
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -79,20 +80,21 @@ func (val *Strings) Scan(data interface{}) error {
 	return json.Unmarshal(data.([]byte), &val)
 }
 
-type FmtTime struct {
-	time.Time
-}
+type FmtTime sql.NullTime
 
 func (t FmtTime) MarshalJSON() ([]byte, error) {
-	var stamp = fmt.Sprintf("\"%s\"", t.Format("2006-01-02 15:04:05"))
-	return []byte(stamp), nil
+	if t.Valid {
+		var stamp = fmt.Sprintf("\"%s\"", t.Time.Format("2006-01-02 15:04:05"))
+		return []byte(stamp), nil
+	}
+	return json.Marshal(nil)
 }
 
 func (t FmtTime) Normalize(layout ...string) string {
 	if len(layout) == 0 {
 		layout = append(layout, "2006-01-02 15:04:05")
 	}
-	return fmt.Sprintf("\"%s\"", t.Format(layout[0]))
+	return fmt.Sprintf("\"%s\"", t.Time.Format(layout[0]))
 }
 
 func (t FmtTime) Value() (driver.Value, error) {
