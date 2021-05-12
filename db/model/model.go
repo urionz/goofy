@@ -90,6 +90,18 @@ func (t FmtTime) MarshalJSON() ([]byte, error) {
 	return json.Marshal(nil)
 }
 
+func (t *FmtTime) UnmarshalJSON(b []byte) error {
+	if string(b) == "null" {
+		t.Valid = false
+		return nil
+	}
+	err := json.Unmarshal(b, &t.Time)
+	if err == nil {
+		t.Valid = true
+	}
+	return err
+}
+
 func (t FmtTime) Normalize(layout ...string) string {
 	if len(layout) == 0 {
 		layout = append(layout, "2006-01-02 15:04:05")
