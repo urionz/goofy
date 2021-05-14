@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/filesystem"
 	"github.com/urionz/goutil/arrutil"
 	"github.com/urionz/goutil/strutil"
@@ -45,17 +46,18 @@ func (s *Storage) Disk(disk ...string) *Storage {
 	return s
 }
 
-func (s *Storage) Upload(req *http.Request, savePath string) (string, error) {
+func (s *Storage) Upload(req *http.Request, savePath string) (string, string, error) {
+	var u string
 	f, fh, err := req.FormFile(s.name)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	uploadMineType, err := s.MimeType(f)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if !arrutil.StringsHas(s.mimes, uploadMineType) && !arrutil.StringsHas(s.mimes, "*") {
-		return "", fmt.Errorf("the file mine type is illegal")
+		return "", "", fmt.Errorf("the file mine type is illegal")
 	}
 	t := time.Now()
 	date := t.Format("20060102")
@@ -64,7 +66,15 @@ func (s *Storage) Upload(req *http.Request, savePath string) (string, error) {
 	} else {
 		savePath = path.Join(date, savePath)
 	}
-	return s.Manager.Disk(s.disk).Upload(savePath, fh)
+	u, err = s.Manager.Disk(s.disk).Upload(savePath, fh)
+	return u, savePath, err
+}
+
+func (s *Storage) Fs(disk ...string) contracts.Filesystem {
+	if len(disk) > 0 && disk[0] != "" {
+		s.disk = disk[0]
+	}
+	return s.Manager.Disk(s.disk)
 }
 
 func (*Storage) MimeType(file multipart.File) (string, error) {
