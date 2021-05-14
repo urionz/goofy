@@ -62,6 +62,10 @@ func (a *Adapter) Url(path string) string {
 	return a.driver.Url(path)
 }
 
+func (a *Adapter) GetPreSignedUrl(path string) string {
+	return a.driver.GetPreSignedUrl(path)
+}
+
 func (a *Adapter) WriteStream(path string, stream io.Reader) (string, error) {
 	return a.driver.WriteStream(path, stream)
 }

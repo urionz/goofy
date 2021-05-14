@@ -59,6 +59,7 @@ type Filesystem interface {
 
 type Cloud interface {
 	Url(path string) string
+	GetPreSignedUrl(path string) string
 }
 
 type CanOverwriteFiles interface {
