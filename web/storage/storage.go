@@ -70,6 +70,13 @@ func (s *Storage) Upload(req *http.Request, savePath string) (string, string, er
 	return u, savePath, err
 }
 
+func (s *Storage) GetPreSignedUploadUrl(filename string) string {
+	t := time.Now()
+	date := t.Format("20060102")
+	savePath := path.Join(date, filename)
+	return s.Manager.Disk(s.disk).GetPreSignedUrl(savePath)
+}
+
 func (s *Storage) Fs(disk ...string) contracts.Filesystem {
 	if len(disk) > 0 && disk[0] != "" {
 		s.disk = disk[0]
