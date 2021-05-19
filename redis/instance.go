@@ -14,3 +14,7 @@ func Conn(name ...string) contracts.RedisConnection {
 	}
 	return conn
 }
+
+func Multi(cb contracts.MultiFunc, name ...string) error {
+	return Conn(name...).Multi(cb)
+}

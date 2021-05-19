@@ -54,3 +54,12 @@ func (conn *Connection) Del(keys ...string) error {
 	}
 	return nil
 }
+
+func (conn *Connection) Multi(cb contracts.MultiFunc) error {
+	tx := conn.client.TxPipeline()
+	cb(tx)
+	if _, err := tx.Exec(context.Background()); err != nil {
+		return err
+	}
+	return nil
+}

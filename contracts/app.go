@@ -20,7 +20,7 @@ type Application interface {
 	AddServices(services ...interface{}) Application
 	AddCommanders(commander ...Commander) Application
 	AddListeners(eventListeners event.Listeners) Application
-	Dispatch(name string, payload event.M) Application
+	Dispatch(job interface{}, payload event.M) Application
 	MustEmit(name string, payload event.M) event.Event
 	Emit(name string, payload event.M) (error, event.Event)
 	ProvideValue(value di.Value, options ...di.ProvideOption) error
