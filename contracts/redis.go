@@ -10,9 +10,12 @@ type RedisFactory interface {
 	Connection(name ...string) (RedisConnection, error)
 }
 
-type RedisClient = redis.Client
-
-type MultiFunc func(pipe redis.Pipeliner)
+type (
+	RedisClient = redis.Client
+	Pipeliner   = redis.Pipeliner
+	Pipeline    = redis.Pipeline
+	MultiFunc   func(pipe Pipeliner)
+)
 
 type RedisConnection interface {
 	GetName() string
