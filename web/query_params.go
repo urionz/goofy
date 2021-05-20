@@ -18,17 +18,26 @@ func NewQueryParams(ctx iris.Context) *QueryParams {
 	}
 }
 
-func (q *QueryParams) getValueByColumn(column string) string {
+func (q *QueryParams) getValueByColumn(column string, defCol ...string) string {
 	if q.Context == nil {
 		return ""
+	}
+	def := ""
+	if len(defCol) > 0 && defCol[0] != "" {
+		def = defCol[0]
 	}
 	fieldName := strutil.ToLowerCamel(column)
 	switch q.Context.Method() {
 	case "GET":
-		return q.Context.URLParamDefault(column, "")
+		return q.Context.URLParamDefault(column, def)
 	default:
-		return q.Context.FormValueDefault(fieldName, "")
+		return q.Context.FormValueDefault(fieldName, def)
 	}
+}
+
+func (q *QueryParams) Eq(column string, args ...interface{}) *QueryParams {
+	q.SqlCnd.Eq(column, args...)
+	return q
 }
 
 func (q *QueryParams) EqByReq(column string) *QueryParams {
@@ -39,16 +48,16 @@ func (q *QueryParams) EqByReq(column string) *QueryParams {
 	return q
 }
 
-func (q *QueryParams) AscByReq(column string) *QueryParams {
-	value := q.getValueByColumn(column)
+func (q *QueryParams) AscByReq(defCol ...string) *QueryParams {
+	value := q.getValueByColumn("asc", defCol...)
 	if len(value) > 0 {
 		q.Asc(value)
 	}
 	return q
 }
 
-func (q *QueryParams) DescByReq(column string) *QueryParams {
-	value := q.getValueByColumn(column)
+func (q *QueryParams) DescByReq(defCol ...string) *QueryParams {
+	value := q.getValueByColumn("desc", defCol...)
 	if len(value) > 0 {
 		q.Desc(value)
 	}
@@ -76,6 +85,11 @@ func (q *QueryParams) EqByReqs(columns []string) *QueryParams {
 	return q
 }
 
+func (q *QueryParams) NotEq(column string, args ...interface{}) *QueryParams {
+	q.SqlCnd.NotEq(column, args...)
+	return q
+}
+
 func (q *QueryParams) NotEqByReq(column string) *QueryParams {
 	value := q.getValueByColumn(column)
 	if len(value) > 0 {
@@ -92,11 +106,21 @@ func (q *QueryParams) GtByReq(column string) *QueryParams {
 	return q
 }
 
+func (q *QueryParams) Gt(column string, args ...interface{}) *QueryParams {
+	q.SqlCnd.Gt(column, args...)
+	return q
+}
+
 func (q *QueryParams) GteByReq(column string) *QueryParams {
 	value := q.getValueByColumn(column)
 	if len(value) > 0 {
 		q.Gte(column, value)
 	}
+	return q
+}
+
+func (q *QueryParams) Gte(column string, args ...interface{}) *QueryParams {
+	q.SqlCnd.Gte(column, args...)
 	return q
 }
 
@@ -108,6 +132,11 @@ func (q *QueryParams) LtByReq(column string) *QueryParams {
 	return q
 }
 
+func (q *QueryParams) Lt(column string, args ...interface{}) *QueryParams {
+	q.SqlCnd.Lt(column, args...)
+	return q
+}
+
 func (q *QueryParams) LteByReq(column string) *QueryParams {
 	value := q.getValueByColumn(column)
 	if len(value) > 0 {
@@ -116,11 +145,21 @@ func (q *QueryParams) LteByReq(column string) *QueryParams {
 	return q
 }
 
+func (q *QueryParams) Lte(column string, args ...interface{}) *QueryParams {
+	q.SqlCnd.Lte(column, args...)
+	return q
+}
+
 func (q *QueryParams) LikeByReq(column string) *QueryParams {
 	value := q.getValueByColumn(column)
 	if len(value) > 0 {
 		q.Like(column, value)
 	}
+	return q
+}
+
+func (q *QueryParams) Like(column string, str string) *QueryParams {
+	q.SqlCnd.Like(column, str)
 	return q
 }
 
