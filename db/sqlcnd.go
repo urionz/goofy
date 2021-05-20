@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+
 	"github.com/urionz/goofy/pagination"
 	"gorm.io/gorm"
 )
@@ -142,9 +144,9 @@ func (s *SqlCnd) Build(db *gorm.DB) *gorm.DB {
 	if len(s.Orders) > 0 {
 		for _, order := range s.Orders {
 			if order.Asc {
-				ret = ret.Order(order.Column + " ASC")
+				ret = ret.Order(fmt.Sprintf("`%s` ASC", order.Column))
 			} else {
-				ret = ret.Order(order.Column + " DESC")
+				ret = ret.Order(fmt.Sprintf("`%s` DESC", order.Column))
 			}
 		}
 	}
