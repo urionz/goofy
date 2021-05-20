@@ -39,6 +39,22 @@ func (q *QueryParams) EqByReq(column string) *QueryParams {
 	return q
 }
 
+func (q *QueryParams) AscByReq(column string) *QueryParams {
+	value := q.getValueByColumn(column)
+	if len(value) > 0 {
+		q.Asc(value)
+	}
+	return q
+}
+
+func (q *QueryParams) DescByReq(column string) *QueryParams {
+	value := q.getValueByColumn(column)
+	if len(value) > 0 {
+		q.Desc(value)
+	}
+	return q
+}
+
 func (q *QueryParams) DateByReq(column, operator string, def ...string) *QueryParams {
 	value := q.getValueByColumn(column)
 	if len(value) > 0 {
@@ -134,7 +150,7 @@ func (q *QueryParams) PageByReq() *QueryParams {
 		return q
 	}
 	paging := GetPaging(q.Context)
-	q.Page(paging.Page, paging.Limit)
+	q.Page(paging.Page, paging.Limit, paging.Start)
 	return q
 }
 
@@ -148,17 +164,22 @@ func (q *QueryParams) Desc(column string) *QueryParams {
 	return q
 }
 
-func (q *QueryParams) Limit(limit int) *QueryParams {
-	q.Page(1, limit)
+func (q *QueryParams) Limit(limit int, start ...int) *QueryParams {
+	q.Page(1, limit, start...)
 	return q
 }
 
-func (q *QueryParams) Page(page, limit int) *QueryParams {
+func (q *QueryParams) Page(page, limit int, start ...int) *QueryParams {
+	startPos := 0
+	if len(start) > 0 && start[0] != 0 {
+		startPos = start[0]
+	}
 	if q.Paging == nil {
-		q.Paging = &pagination.Paging{Page: page, Limit: limit}
+		q.Paging = &pagination.Paging{Page: page, Limit: limit, Start: startPos}
 	} else {
 		q.Paging.Page = page
 		q.Paging.Limit = limit
+		q.Paging.Start = startPos
 	}
 	return q
 }

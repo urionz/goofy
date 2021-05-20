@@ -1453,19 +1453,21 @@ func checkRequired(v reflect.Value, t reflect.StructField, o reflect.Value, opti
 				switch requiredName {
 				case "required_if":
 					field := o.FieldByName(anotherField)
-					if !arrutil.StringsHas(value, field.String()) {
+					if field.IsValid() && !field.IsZero() && !arrutil.StringsHas(value, field.String()) {
 						passed = true
 					}
 					break
 				case "required_unless":
 					field := o.FieldByName(anotherField)
-					if !field.IsZero() && field.Kind() == reflect.String && arrutil.StringsHas(value, field.String()) {
-						passed = true
+					if field.IsValid() {
+						if !field.IsZero() && field.Kind() == reflect.String && arrutil.StringsHas(value, field.String()) {
+							passed = true
+						}
 					}
 					break
 				case "required_with":
 					for _, v := range args {
-						if vv := o.FieldByName(v); vv.IsZero() || !vv.IsValid() {
+						if vv := o.FieldByName(v); !vv.IsValid() || vv.IsZero() {
 							passed = true
 							break
 						}
@@ -1474,7 +1476,7 @@ func checkRequired(v reflect.Value, t reflect.StructField, o reflect.Value, opti
 				case "required_with_all":
 					emptyNum := 0
 					for _, v := range args {
-						if vv := o.FieldByName(v); vv.IsZero() || !vv.IsValid() {
+						if vv := o.FieldByName(v); !vv.IsValid() || vv.IsZero() {
 							emptyNum++
 						}
 					}
@@ -1484,7 +1486,7 @@ func checkRequired(v reflect.Value, t reflect.StructField, o reflect.Value, opti
 					break
 				case "required_without":
 					for _, v := range args {
-						if vv := o.FieldByName(v); vv.IsZero() || !vv.IsValid() {
+						if vv := o.FieldByName(v); !vv.IsValid() || vv.IsZero() {
 							passed = false
 							break
 						}
@@ -1494,7 +1496,7 @@ func checkRequired(v reflect.Value, t reflect.StructField, o reflect.Value, opti
 				case "required_without_all":
 					emptyNum := 0
 					for _, v := range args {
-						if vv := o.FieldByName(v); vv.IsZero() || !vv.IsValid() {
+						if vv := o.FieldByName(v); !vv.IsValid() || vv.IsZero() {
 							emptyNum++
 						}
 					}

@@ -6,6 +6,7 @@ type Paging struct {
 	Page  int   `json:"page"`  // 页码
 	Limit int   `json:"limit"` // 每页条数
 	Total int64 `json:"total"` // 总数据条数
+	Start int   `json:"start"` // 起始位置
 }
 
 func (p *Paging) Offset() int {
@@ -13,7 +14,7 @@ func (p *Paging) Offset() int {
 	if p.Page > 0 {
 		offset = (p.Page - 1) * p.Limit
 	}
-	return offset
+	return offset + p.Start
 }
 
 func (p *Paging) TotalPage() int {

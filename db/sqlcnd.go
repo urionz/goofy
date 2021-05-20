@@ -105,19 +105,24 @@ func (s *SqlCnd) Desc(column string) *SqlCnd {
 }
 
 func (s *SqlCnd) Limit(limit int) *SqlCnd {
-	s.Page(1, limit)
+	s.Page(1, limit, 0)
 	return s
 }
 
-func (s *SqlCnd) Page(page, limit int) *SqlCnd {
+func (s *SqlCnd) Page(page, limit, start int) *SqlCnd {
 	if s.Paging == nil {
-		s.Paging = &pagination.Paging{Page: page, Limit: limit}
+		s.Paging = &pagination.Paging{Page: page, Limit: limit, Start: start}
 	} else {
 		s.Paging.Page = page
 		s.Paging.Limit = limit
+		s.Paging.Start = start
 	}
 	return s
 }
+
+// func (s *SqlCnd) Start(start int) *SqlCnd {
+// 	s.Page(1, )
+// }
 
 func (s *SqlCnd) Build(db *gorm.DB) *gorm.DB {
 	ret := db
