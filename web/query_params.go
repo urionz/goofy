@@ -35,6 +35,11 @@ func (q *QueryParams) getValueByColumn(column string, defCol ...string) string {
 	}
 }
 
+func (q *QueryParams) In(column string, args interface{}) *QueryParams {
+	q.SqlCnd.In(column, args)
+	return q
+}
+
 func (q *QueryParams) Eq(column string, args ...interface{}) *QueryParams {
 	q.SqlCnd.Eq(column, args...)
 	return q
