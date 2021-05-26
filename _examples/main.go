@@ -4,13 +4,20 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
+	"github.com/urionz/goofy/event"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
 )
 
 func main() {
-	goofy.Default.AddServices(
+	goofy.Default.AddListeners(event.Listeners{
+		"aaa": []event.Listener{
+			goofy.ListenerFunc(func(e event.Event) error {
+				return nil
+			}),
+		},
+	}).AddServices(
 		func(r *web.Server) {
 			mvc.New(r.Application).Handle(new(Test))
 		},
