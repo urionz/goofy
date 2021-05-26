@@ -14,6 +14,7 @@ func main() {
 	goofy.Default.AddListeners(event.Listeners{
 		"aaa": []event.Listener{
 			goofy.ListenerFunc(func(e event.Event) error {
+				panic("hahahahah")
 				return nil
 			}),
 		},
@@ -37,11 +38,7 @@ type Req struct {
 }
 
 func (*Test) Post(ctx *context.Context, validate *validation.Validation) *web.JsonResult {
-	var req Req
-	if err := validate.Validate(ctx, &req); err != nil {
-		return web.JsonError(err)
-	}
-
+	goofy.Default.Emit("aaa", event.M{})
 	return web.JsonSuccess()
 }
 

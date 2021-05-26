@@ -36,7 +36,7 @@ func ListenerFunc(fn func(event.Event) error) event.ListenerFunc {
 	return func(e event.Event) error {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Error(err)
+				log.Sugar(2).Panic(err)
 			}
 		}()
 		return fn(e)

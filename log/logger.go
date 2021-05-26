@@ -73,8 +73,12 @@ func Fatalf(format string, args ...interface{}) {
 	log.Logger.WithOptions(zap.AddCallerSkip(1)).Sugar().Fatalf(format, args...)
 }
 
-func Sugar() *zap.SugaredLogger {
-	return log.Logger.WithOptions(zap.AddCallerSkip(1)).Sugar()
+func Sugar(skip ...int) *zap.SugaredLogger {
+	skipCaller := 1
+	if len(skip) > 0 {
+		skipCaller = skip[0]
+	}
+	return log.Logger.WithOptions(zap.AddCallerSkip(skipCaller)).Sugar()
 }
 
 func Log() *Logger {
