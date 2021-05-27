@@ -194,7 +194,7 @@ func (q *QueryParams) PageByReq() *QueryParams {
 		return q
 	}
 	paging := GetPaging(q.Context)
-	q.Page(paging.Page, paging.Limit, paging.Start)
+	q.Page(paging.Page, paging.Limit, paging.Last)
 	return q
 }
 
@@ -213,17 +213,17 @@ func (q *QueryParams) Limit(limit int, start ...int) *QueryParams {
 	return q
 }
 
-func (q *QueryParams) Page(page, limit int, start ...int) *QueryParams {
-	startPos := 0
-	if len(start) > 0 && start[0] != 0 {
-		startPos = start[0]
+func (q *QueryParams) Page(page, limit int, last ...int) *QueryParams {
+	lastId := 0
+	if len(last) > 0 && last[0] != 0 {
+		lastId = last[0]
 	}
 	if q.Paging == nil {
-		q.Paging = &pagination.Paging{Page: page, Limit: limit, Start: startPos}
+		q.Paging = &pagination.Paging{Page: page, Limit: limit, Last: lastId}
 	} else {
 		q.Paging.Page = page
 		q.Paging.Limit = limit
-		q.Paging.Start = startPos
+		q.Paging.Last = lastId
 	}
 	return q
 }

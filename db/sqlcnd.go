@@ -111,20 +111,16 @@ func (s *SqlCnd) Limit(limit int) *SqlCnd {
 	return s
 }
 
-func (s *SqlCnd) Page(page, limit, start int) *SqlCnd {
+func (s *SqlCnd) Page(page, limit, last int) *SqlCnd {
 	if s.Paging == nil {
-		s.Paging = &pagination.Paging{Page: page, Limit: limit, Start: start}
+		s.Paging = &pagination.Paging{Page: page, Limit: limit, Last: last}
 	} else {
 		s.Paging.Page = page
 		s.Paging.Limit = limit
-		s.Paging.Start = start
+		s.Paging.Last = last
 	}
 	return s
 }
-
-// func (s *SqlCnd) Start(start int) *SqlCnd {
-// 	s.Page(1, )
-// }
 
 func (s *SqlCnd) Build(db *gorm.DB) *gorm.DB {
 	ret := db
@@ -153,6 +149,9 @@ func (s *SqlCnd) Build(db *gorm.DB) *gorm.DB {
 
 	// limit
 	if s.Paging != nil && s.Paging.Limit > 0 {
+		if s.Paging.Last != 0 {
+			ret = ret.Where("id > ?", s.Paging.Last)
+		}
 		ret = ret.Limit(s.Paging.Limit)
 	}
 
