@@ -133,12 +133,13 @@ func FormValueBool(ctx iris.Context, name string) (bool, error) {
 func GetPaging(ctx iris.Context) *pagination.Paging {
 	page := FormValueIntDefault(ctx, "page", 1)
 	limit := FormValueIntDefault(ctx, "limit", 20)
-	last := FormValueIntDefault(ctx, "last", 0)
+	max := FormValueIntDefault(ctx, "max_id", 0)
+	min := FormValueIntDefault(ctx, "min_id", 0)
 	if page <= 0 {
 		page = 1
 	}
 	if limit <= 0 {
 		limit = 20
 	}
-	return &pagination.Paging{Page: page, Limit: limit, Last: last}
+	return &pagination.Paging{Page: page, Limit: limit, MaxId: max, MinId: min}
 }

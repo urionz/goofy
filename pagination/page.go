@@ -3,10 +3,11 @@ package pagination
 import "database/sql"
 
 type Paging struct {
-	Page  int   `json:"page"`  // 页码
-	Limit int   `json:"limit"` // 每页条数
-	Total int64 `json:"total"` // 总数据条数
-	Last  int   `json:"last"`  // 最终位置
+	Page  int   `json:"page"`   // 页码
+	Limit int   `json:"limit"`  // 每页条数
+	Total int64 `json:"total"`  // 总数据条数
+	MaxId int   `json:"max_id"` // 最大位置
+	MinId int   `json:"min_id"` // 最小位置
 }
 
 func (p *Paging) Offset() int {

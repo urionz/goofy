@@ -194,7 +194,7 @@ func (q *QueryParams) PageByReq() *QueryParams {
 		return q
 	}
 	paging := GetPaging(q.Context)
-	q.Page(paging.Page, paging.Limit, paging.Last)
+	q.Page(paging.Page, paging.Limit, paging.MaxId, paging.MinId)
 	return q
 }
 
@@ -208,22 +208,19 @@ func (q *QueryParams) Desc(column string) *QueryParams {
 	return q
 }
 
-func (q *QueryParams) Limit(limit int, start ...int) *QueryParams {
-	q.Page(1, limit, start...)
+func (q *QueryParams) Limit(limit int, max, min int) *QueryParams {
+	q.Page(1, limit, max, min)
 	return q
 }
 
-func (q *QueryParams) Page(page, limit int, last ...int) *QueryParams {
-	lastId := 0
-	if len(last) > 0 && last[0] != 0 {
-		lastId = last[0]
-	}
+func (q *QueryParams) Page(page, limit int, max, min int) *QueryParams {
 	if q.Paging == nil {
-		q.Paging = &pagination.Paging{Page: page, Limit: limit, Last: lastId}
+		q.Paging = &pagination.Paging{Page: page, Limit: limit, MaxId: max, MinId: min}
 	} else {
 		q.Paging.Page = page
 		q.Paging.Limit = limit
-		q.Paging.Last = lastId
+		q.Paging.MaxId = max
+		q.Paging.MinId = min
 	}
 	return q
 }
