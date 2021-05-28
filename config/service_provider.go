@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/shima-park/agollo"
 	"github.com/urionz/color"
@@ -67,6 +68,17 @@ func NewServiceProvider(app contracts.Application) error {
 
 		var loadConf = func(kv agollo.Configurations) {
 			for k, value := range kv {
+				if strings.HasSuffix(k, "]") {
+					fieldKeys := strings.Split(k, ".")
+					target := fieldKeys[len(fieldKeys)-1]
+					lastKeys := strings.Split(target, "[")
+					arrKey := lastKeys[0]
+					key := strings.Join(append(fieldKeys[0:len(fieldKeys)-1], arrKey), ".")
+					existsValue := serve.Config.Strings(key)
+					existsValue = append(existsValue, value.(string))
+					serve.Set(key, existsValue, true)
+					continue
+				}
 				serve.Set(k, value, true)
 			}
 		}

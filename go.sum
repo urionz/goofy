@@ -477,6 +477,8 @@ github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9dec
 github.com/zouyx/agollo v1.9.0 h1:75ZZD6Mwinry71Ds4ZpB9dOTDn3hC8cNSUlgVO5uUxU=
 github.com/zouyx/agollo/v4 v4.0.6 h1:o+aFzsjzk4aO/tNMFF8LE8UQ7Swl4FDTugObWM3zDpE=
 github.com/zouyx/agollo/v4 v4.0.6/go.mod h1:unhojnZiGLlT4gLpWz3Oa7sGcChZWv/1DJBkV6s8uAE=
+github.com/zouyx/agollo/v4 v4.0.7 h1:aUwdnCz+1jExZbZvN1nZ+kKjn62Ula5joekZHTccj2E=
+github.com/zouyx/agollo/v4 v4.0.7/go.mod h1:unhojnZiGLlT4gLpWz3Oa7sGcChZWv/1DJBkV6s8uAE=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=

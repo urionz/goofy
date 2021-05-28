@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/mvc"
 	"github.com/urionz/goofy"
+	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/event"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
@@ -19,8 +21,8 @@ func main() {
 			}),
 		},
 	}).AddServices(
-		func(r *web.Server) {
-			mvc.New(r.Application).Handle(new(Test))
+		func(conf contracts.Config) {
+			fmt.Println(conf.Strings("filesystems.disks.cos.content_detect_type"))
 		},
 	).Run()
 }
