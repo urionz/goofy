@@ -89,6 +89,11 @@ func NewServiceProvider(app contracts.Application) error {
 		watchCh := apollo.Watch()
 
 		go func() {
+			defer func() {
+				if err := recover(); err != nil {
+					log.Error(err)
+				}
+			}()
 			for {
 				select {
 				case err := <-errCh:

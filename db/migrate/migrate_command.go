@@ -506,7 +506,7 @@ func RunUp(file contracts.MigrateFile, batch int) error {
 	if err := file.Up(conn); err != nil {
 		return err
 	}
-	if err := repository.Log(fmt.Sprintf("%d_%s", file.MigrateTimestamp(), name), batch); err != nil {
+	if err := repository.Log(GetMigrationName(file), batch); err != nil {
 		return err
 	}
 
@@ -568,7 +568,7 @@ func GetMigrationFiles() []contracts.MigrateFile {
 
 func GetMigrationName(migrateFile contracts.MigrateFile) string {
 	migrationNames := strings.Split(reflect.TypeOf(migrateFile).String(), ".")
-	return strutil.ToSnake(migrationNames[len(migrationNames)-1])
+	return fmt.Sprintf("%d_%s", migrateFile.MigrateTimestamp(), strutil.ToSnake(migrationNames[len(migrationNames)-1]))
 }
 
 func SortFileMigrations(files []contracts.MigrateFile) {
@@ -604,9 +604,7 @@ func RollbackMigrations(migrations []*Model) error {
 
 	existsFileMigrates := func(dbMigrate *Model) (contracts.MigrateFile, bool) {
 		for _, migrateFile := range files {
-			migrationNames := strings.Split(reflect.TypeOf(migrateFile).String(), ".")
-			migrationName := strutil.ToSnake(migrationNames[len(migrationNames)-1])
-			if dbMigrate.Migration == fmt.Sprintf("%d_%s", migrateFile.MigrateTimestamp(), migrationName) {
+			if dbMigrate.Migration == GetMigrationName(migrateFile) {
 				return migrateFile, true
 			}
 		}
