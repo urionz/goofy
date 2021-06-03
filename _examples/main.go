@@ -7,6 +7,7 @@ import (
 	"github.com/urionz/goofy"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/event"
+	"github.com/urionz/goofy/schedule"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
@@ -20,6 +21,10 @@ func main() {
 				return nil
 			}),
 		},
+	}).AddSchedules(schedule.Job{
+		"* * * * *": goofy.Jobs(func() {
+			fmt.Println("*****")
+		}),
 	}).AddServices(
 		func(conf contracts.Config) {
 			fmt.Println(conf.Strings("filesystems.disks.cos.content_detect_type"))

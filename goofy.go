@@ -12,6 +12,7 @@ import (
 	"github.com/gookit/event"
 	"github.com/gookit/gcli/v3"
 	"github.com/robfig/cron/v3"
+	"github.com/urionz/color"
 	"github.com/urionz/goofy/cache"
 	"github.com/urionz/goofy/cmds/dlv"
 	"github.com/urionz/goofy/cmds/repl"
@@ -104,10 +105,19 @@ func (app *Application) Dir() string {
 }
 
 func (app *Application) Run() contracts.Application {
+	if err := recover(); err != nil {
+		color.Warnln(err)
+	}
 	if err := app.Container.Invoke(app.bootstrap); err != nil {
 		panic(err)
 	}
 	if len(os.Args) > 0 && !strings.HasSuffix(os.Args[0], "test") {
+		go func() {
+			if err := recover(); err != nil {
+				color.Warnln(err)
+			}
+			app.Cron.Run()
+		}()
 		app.App.Run(nil)
 	}
 	return app
