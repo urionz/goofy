@@ -81,6 +81,7 @@ func (m *Manager) resolve(name string) (conn *gorm.DB, err error) {
 			conf.String("charset", "utf8mb4"),
 		),
 	), &gorm.Config{
+		DisableForeignKeyConstraintWhenMigrating: !conf.Bool("auto_migrate_constraint", false),
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   conf.String("prefix", ""),
 			SingularTable: conf.Bool("singular_table", false),

@@ -32,6 +32,8 @@ default = "test"
 	charset = "utf8mb4"
 	# 前缀
 	prefix = ""
+	# 迁移自动生成外键约束
+	auto_migrate_constraint = false
 	# 是否开启表名单数
 	singular_table = false
 	# 慢日志阈值（毫秒）
