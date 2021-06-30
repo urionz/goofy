@@ -24,7 +24,12 @@ func (app *Application) Emit(name string, payload event.M) (error, event.Event) 
 }
 
 func (app *Application) Dispatch(name string, payload event.M) contracts.Application {
-	app.Manager.AsyncFire(event.NewBasic(name, payload))
+	go func() {
+		_, err := app.Manager.Fire(name, payload)
+		if err != nil {
+			log.Error(err)
+		}
+	}()
 	return app
 }
 
