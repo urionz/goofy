@@ -26,7 +26,7 @@ func (app *Application) Emit(name string, payload event.M) (error, event.Event) 
 func (app *Application) Dispatch(name string, payload event.M, fn ...func(e error)) contracts.Application {
 	go func() {
 		err, _ := app.Manager.Fire(name, payload)
-		if len(fn) > 0 {
+		if len(fn) > 0 && err != nil {
 			fn[0](err)
 		}
 	}()
