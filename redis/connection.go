@@ -99,6 +99,102 @@ func (conn *Connection) SRem(key string, members ...interface{}) error {
 	return conn.client.SRem(context.Background(), key, members...).Err()
 }
 
+func (conn *Connection) ZAdd(key string, members ...*contracts.Z) (int64, error) {
+	return conn.client.ZAdd(context.Background(), key, members...).Result()
+}
+
+func (conn *Connection) ZScore(key, member string) (float64, error) {
+	return conn.client.ZScore(context.Background(), key, member).Result()
+}
+
+func (conn *Connection) ZLexCount(key, min, max string) (int64, error) {
+	return conn.client.ZLexCount(context.Background(), key, min, max).Result()
+}
+
+func (conn *Connection) ZRange(key string, start, stop int64) ([]string, error) {
+	return conn.client.ZRange(context.Background(), key, start, stop).Result()
+}
+
+func (conn *Connection) ZRangeByLex(key string, opt *contracts.ZRangeBy) ([]string, error) {
+	return conn.client.ZRangeByLex(context.Background(), key, opt).Result()
+}
+
+func (conn *Connection) ZRangeByScore(key string, opt *contracts.ZRangeBy) ([]string, error) {
+	return conn.client.ZRangeByScore(context.Background(), key, opt).Result()
+}
+
+func (conn *Connection) ZCount(key, min, max string) (int64, error) {
+	return conn.client.ZCount(context.Background(), key, min, max).Result()
+}
+
+func (conn *Connection) ZRem(key, min, max string) (int64, error) {
+	return conn.client.ZRem(context.Background(), key, min, max).Result()
+}
+
+func (conn *Connection) ZRemRangeByLex(key, min, max string) (int64, error) {
+	return conn.client.ZRemRangeByLex(context.Background(), key, min, max).Result()
+}
+
+func (conn *Connection) ZRemRangeByRank(key string, start, stop int64) (int64, error) {
+	return conn.client.ZRemRangeByRank(context.Background(), key, start, stop).Result()
+}
+
+func (conn *Connection) ZRemRangeByScore(key, min, max string) (int64, error) {
+	return conn.client.ZRemRangeByScore(context.Background(), key, min, max).Result()
+}
+
+func (conn *Connection) ZRevRange(key string, start, stop int64) ([]string, error) {
+	return conn.client.ZRevRange(context.Background(), key, start, stop).Result()
+}
+
+func (conn *Connection) ZRevRangeByLex(key string, opt *contracts.ZRangeBy) ([]string, error) {
+	return conn.client.ZRevRangeByLex(context.Background(), key, opt).Result()
+}
+
+func (conn *Connection) ZRevRangeByScore(key string, opt *contracts.ZRangeBy) ([]string, error) {
+	return conn.client.ZRevRangeByScore(context.Background(), key, opt).Result()
+}
+
+func (conn *Connection) ZRevRangeByScoreWithScores(key string, opt *contracts.ZRangeBy) ([]contracts.Z, error) {
+	return conn.client.ZRevRangeByScoreWithScores(context.Background(), key, opt).Result()
+}
+
+func (conn *Connection) ZRevRangeWithScores(key string, start, stop int64) ([]contracts.Z, error) {
+	return conn.client.ZRevRangeWithScores(context.Background(), key, start, stop).Result()
+}
+
+func (conn *Connection) ZRevRank(key, member string) (int64, error) {
+	return conn.client.ZRevRank(context.Background(), key, member).Result()
+}
+
+func (conn *Connection) ZScan(key string, cursor uint64, match string, count int64) ([]string, uint64, error) {
+	return conn.client.ZScan(context.Background(), key, cursor, match, count).Result()
+}
+
+func (conn *Connection) ZRank(key, member string) (int64, error) {
+	return conn.client.ZRank(context.Background(), key, member).Result()
+}
+
+func (conn *Connection) ZCard(key string) (int64, error) {
+	return conn.client.ZCard(context.Background(), key).Result()
+}
+
+func (conn *Connection) ZIncr(key string, member *contracts.Z) (float64, error) {
+	return conn.client.ZIncr(context.Background(), key, member).Result()
+}
+
+func (conn *Connection) ZIncrBy(key string, inc float64, member string) (float64, error) {
+	return conn.client.ZIncrBy(context.Background(), key, inc, member).Result()
+}
+
+func (conn *Connection) ZIncrNX(key string, member *contracts.Z) (float64, error) {
+	return conn.client.ZIncrNX(context.Background(), key, member).Result()
+}
+
+func (conn *Connection) ZIncrXX(key string, member *contracts.Z) (float64, error) {
+	return conn.client.ZIncrXX(context.Background(), key, member).Result()
+}
+
 func (conn *Connection) Multi(cb contracts.MultiFunc) error {
 	tx := conn.client.TxPipeline()
 	cb(tx)
