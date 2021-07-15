@@ -333,3 +333,11 @@ func SUnionStore(dest string, keys []string, conn ...string) (int64, error) {
 func SScan(key string, cursor uint64, match string, count int64, conn ...string) ([]string, uint64, error) {
 	return Conn(conn...).SScan(key, cursor, match, count)
 }
+
+func Expire(key string, exp time.Duration, conn ...string) error {
+	return Conn(conn...).Expire(key, exp)
+}
+
+func ExpireAt(key string, tm time.Time, conn ...string) error {
+	return Conn(conn...).ExpireAt(key, tm)
+}

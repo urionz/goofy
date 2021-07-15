@@ -34,6 +34,14 @@ func (conn *Connection) Client() *contracts.RedisClient {
 	return conn.client
 }
 
+func (conn *Connection) Expire(key string, exp time.Duration) error {
+	return conn.client.Expire(context.Background(), key, exp).Err()
+}
+
+func (conn *Connection) ExpireAt(key string, tm time.Time) error {
+	return conn.client.ExpireAt(context.Background(), key, tm).Err()
+}
+
 func (conn *Connection) Get(key string) string {
 	return conn.client.Get(context.Background(), key).Val()
 }

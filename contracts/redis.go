@@ -28,6 +28,9 @@ type RedisConnection interface {
 	Del(keys ...string) error
 	SetEX(key string, value interface{}, expiration time.Duration) error
 
+	Expire(key string, exp time.Duration) error
+	ExpireAt(key string, tm time.Time) error
+
 	// 有序集合
 	ZAdd(key string, members ...*Z) (int64, error)
 	ZCard(key string) (int64, error)
