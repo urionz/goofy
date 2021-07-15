@@ -152,3 +152,123 @@ func ZIncrNX(key string, member *contracts.Z, conn ...string) (float64, error) {
 func ZIncrXX(key string, member *contracts.Z, conn ...string) (float64, error) {
 	return Conn(conn...).ZIncrXX(key, member)
 }
+
+func BLPop(timeout time.Duration, keys []string, conn ...string) ([]string, error) {
+	return Conn(conn...).BLPop(timeout, keys...)
+}
+
+func BRPop(timeout time.Duration, keys []string, conn ...string) ([]string, error) {
+	return Conn(conn...).BRPop(timeout, keys...)
+}
+
+func BRPopLPush(source, dest string, timeout time.Duration, conn ...string) (string, error) {
+	return Conn(conn...).BRPopLPush(source, dest, timeout)
+}
+
+func LIndex(key string, index int64, conn ...string) (string, error) {
+	return Conn(conn...).LIndex(key, index)
+}
+
+func LInsert(key, op string, pivot, value interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).LInsert(key, op, pivot, value)
+}
+
+func LLen(key string, conn ...string) (int64, error) {
+	return Conn(conn...).LLen(key)
+}
+
+func LPop(key string, conn ...string) (string, error) {
+	return Conn(conn...).LPop(key)
+}
+
+func LPush(key string, value []interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).LPush(key, value)
+}
+
+func LPushX(key string, value []interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).LPushX(key, value)
+}
+
+func LRange(key string, start, stop int64, conn ...string) ([]string, error) {
+	return Conn(conn...).LRange(key, start, stop)
+}
+
+func LRem(key string, count int64, value interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).LRem(key, count, value)
+}
+
+func LSet(key string, index int64, value interface{}, conn ...string) (string, error) {
+	return Conn(conn...).LSet(key, index, value)
+}
+
+func LTrim(key string, start, stop int64, conn ...string) (string, error) {
+	return Conn(conn...).LTrim(key, start, stop)
+}
+
+func RPop(key string, conn ...string) (string, error) {
+	return Conn(conn...).RPop(key)
+}
+
+func RPopLPush(source, dest string, conn ...string) (string, error) {
+	return Conn(conn...).RPopLPush(source, dest)
+}
+
+func RPush(key string, value []interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).RPush(key, value...)
+}
+
+func RPushX(key string, value []interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).RPushX(key, value...)
+}
+
+func HMGet(key string, fields []string, conn ...string) []interface{} {
+	return Conn(conn...).HMGet(key, fields...)
+}
+
+func HMSet(key string, values []interface{}, conn ...string) error {
+	return Conn(conn...).HMSet(key, values...)
+}
+
+func HSet(key string, values []interface{}, conn ...string) error {
+	return Conn(conn...).HSet(key, values...)
+}
+
+func HDel(key string, fields []string, conn ...string) (int64, error) {
+	return Conn(conn...).HDel(key, fields...)
+}
+
+func HExists(key, field string, conn ...string) (bool, error) {
+	return Conn(conn...).HExists(key, field)
+}
+
+func HGetAll(key string, conn ...string) (map[string]string, error) {
+	return Conn(conn...).HGetAll(key)
+}
+
+func HIncrBy(key, field string, incr int64, conn ...string) (int64, error) {
+	return Conn(conn...).HIncrBy(key, field, incr)
+}
+
+func HIncrByFloat(key, field string, incr float64, conn ...string) (float64, error) {
+	return Conn(conn...).HIncrByFloat(key, field, incr)
+}
+
+func HKeys(key string, conn ...string) ([]string, error) {
+	return Conn(conn...).HKeys(key)
+}
+
+func HLen(key string, conn ...string) (int64, error) {
+	return Conn(conn...).HLen(key)
+}
+
+func HSetNX(key, field string, value interface{}, conn ...string) (bool, error) {
+	return Conn(conn...).HSetNX(key, field, value)
+}
+
+func HVals(key string, conn ...string) ([]string, error) {
+	return Conn(conn...).HVals(key)
+}
+
+func HScan(key string, cursor uint64, match string, count int64, conn ...string) ([]string, uint64, error) {
+	return Conn(conn...).HScan(key, cursor, match, count)
+}
