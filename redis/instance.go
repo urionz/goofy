@@ -53,10 +53,6 @@ func HGet(key, field string, conn ...string) string {
 	return Conn(conn...).HGet(key, field)
 }
 
-func SIsMember(key string, member interface{}, conn ...string) (bool, error) {
-	return Conn(conn...).SIsMember(key, member)
-}
-
 func ZAdd(key string, members []*contracts.Z, conn ...string) (int64, error) {
 	return Conn(conn...).ZAdd(key, members...)
 }
@@ -271,4 +267,69 @@ func HVals(key string, conn ...string) ([]string, error) {
 
 func HScan(key string, cursor uint64, match string, count int64, conn ...string) ([]string, uint64, error) {
 	return Conn(conn...).HScan(key, cursor, match, count)
+}
+
+// 集合
+func SAdd(key string, members []interface{}, conn ...string) error {
+	return Conn(conn...).SAdd(key, members...)
+}
+
+func SCard(key string, conn ...string) (int64, error) {
+	return Conn(conn...).SCard(key)
+}
+
+func SDiff(keys []string, conn ...string) ([]string, error) {
+	return Conn(conn...).SDiff(keys...)
+}
+
+func SDiffStore(dest string, keys []string, conn ...string) (int64, error) {
+	return Conn(conn...).SDiffStore(dest, keys...)
+}
+
+func SInter(keys []string, conn ...string) ([]string, error) {
+	return Conn(conn...).SInter(keys...)
+}
+
+func SInterStore(dest string, keys []string, conn ...string) (int64, error) {
+	return Conn(conn...).SInterStore(dest, keys...)
+}
+
+func SIsMember(key string, member interface{}, conn ...string) (bool, error) {
+	return Conn(conn...).SIsMember(key, member)
+}
+
+func SMembers(key string, conn ...string) ([]string, error) {
+	return Conn(conn...).SMembers(key)
+}
+
+func SMove(source, dest string, member interface{}, conn ...string) (bool, error) {
+	return Conn(conn...).SMove(source, dest, member)
+}
+
+func SPop(key string, conn ...string) (string, error) {
+	return Conn(conn...).SPop(key)
+}
+
+func SRandMember(key string, conn ...string) (string, error) {
+	return Conn(conn...).SRandMember(key)
+}
+
+func SRandMemberN(key string, count int64, conn ...string) ([]string, error) {
+	return Conn(conn...).SRandMemberN(key, count)
+}
+
+func SRem(key string, members []interface{}, conn ...string) error {
+	return Conn(conn...).SRem(key, members...)
+}
+
+func SUnion(keys []string, conn ...string) ([]string, error) {
+	return Conn(conn...).SUnion(keys...)
+}
+
+func SUnionStore(dest string, keys []string, conn ...string) (int64, error) {
+	return Conn(conn...).SUnionStore(dest, keys...)
+}
+
+func SScan(key string, cursor uint64, match string, count int64, conn ...string) ([]string, uint64, error) {
+	return Conn(conn...).SScan(key, cursor, match, count)
 }

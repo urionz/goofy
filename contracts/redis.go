@@ -28,25 +28,21 @@ type RedisConnection interface {
 	Del(keys ...string) error
 	SetEX(key string, value interface{}, expiration time.Duration) error
 
+	// 有序集合
 	ZAdd(key string, members ...*Z) (int64, error)
 	ZCard(key string) (int64, error)
 	ZCount(key, min, max string) (int64, error)
 	ZIncrBy(key string, inc float64, member string) (float64, error)
 	ZInterStore(dest string, store *ZStore) (int64, error)
-
 	ZScore(key, member string) (float64, error)
 	ZLexCount(key, min, max string) (int64, error)
-	SAdd(key string, members ...interface{}) error
 	Incr(key string) error
 	Decr(key string) error
 	IncrBy(key string, value int64) error
 	DecrBy(key string, value int64) error
-	SIsMember(key string, member interface{}) (bool, error)
-	SRem(key string, members ...interface{}) error
 	ZRange(key string, start, stop int64) ([]string, error)
 	ZRangeByLex(key string, opt *ZRangeBy) ([]string, error)
 	ZRangeByScore(key string, opt *ZRangeBy) ([]string, error)
-
 	ZRem(key, min, max string) (int64, error)
 	ZRemRangeByLex(key, min, max string) (int64, error)
 	ZRemRangeByRank(key string, start, stop int64) (int64, error)
@@ -62,6 +58,25 @@ type RedisConnection interface {
 	ZIncr(key string, member *Z) (float64, error)
 	ZIncrNX(key string, member *Z) (float64, error)
 	ZIncrXX(key string, member *Z) (float64, error)
+
+	// 集合
+	SAdd(key string, members ...interface{}) error
+	SCard(key string) (int64, error)
+	SDiff(key ...string) ([]string, error)
+	SDiffStore(dest string, keys ...string) (int64, error)
+	SInter(key ...string) ([]string, error)
+	SInterStore(dest string, keys ...string) (int64, error)
+	SIsMember(key string, member interface{}) (bool, error)
+	SMembers(key string) ([]string, error)
+	SMove(source, dest string, member interface{}) (bool, error)
+	SPop(key string) (string, error)
+	SRandMember(key string) (string, error)
+	SRandMemberN(key string, count int64) ([]string, error)
+	SRem(key string, members ...interface{}) error
+	SUnion(keys ...string) ([]string, error)
+	SUnionStore(dest string, keys ...string) (int64, error)
+	SScan(key string, cursor uint64, match string, count int64) ([]string, uint64, error)
+
 	Multi(cb MultiFunc) error
 
 	// hash

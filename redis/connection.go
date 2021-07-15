@@ -46,10 +46,6 @@ func (conn *Connection) SetEX(key string, value interface{}, expiration time.Dur
 	return conn.client.SetEX(context.Background(), key, value, expiration).Err()
 }
 
-func (conn *Connection) SAdd(key string, members ...interface{}) error {
-	return conn.client.SAdd(context.Background(), key, members...).Err()
-}
-
 func (conn *Connection) Del(keys ...string) error {
 	for _, key := range keys {
 		if err := conn.client.Del(context.Background(), key).Err(); err != nil {
@@ -73,14 +69,6 @@ func (conn *Connection) IncrBy(key string, value int64) error {
 
 func (conn *Connection) DecrBy(key string, value int64) error {
 	return conn.client.DecrBy(context.Background(), key, value).Err()
-}
-
-func (conn *Connection) SIsMember(key string, member interface{}) (bool, error) {
-	return conn.client.SIsMember(context.Background(), key, member).Result()
-}
-
-func (conn *Connection) SRem(key string, members ...interface{}) error {
-	return conn.client.SRem(context.Background(), key, members...).Err()
 }
 
 // 有序集合
@@ -308,6 +296,71 @@ func (conn *Connection) HVals(key string) ([]string, error) {
 
 func (conn *Connection) HScan(key string, cursor uint64, match string, count int64) ([]string, uint64, error) {
 	return conn.client.HScan(context.Background(), key, cursor, match, count).Result()
+}
+
+// 集合
+func (conn *Connection) SAdd(key string, members ...interface{}) error {
+	return conn.client.SAdd(context.Background(), key, members...).Err()
+}
+
+func (conn *Connection) SCard(key string) (int64, error) {
+	return conn.client.SCard(context.Background(), key).Result()
+}
+
+func (conn *Connection) SDiff(key ...string) ([]string, error) {
+	return conn.client.SDiff(context.Background(), key...).Result()
+}
+
+func (conn *Connection) SDiffStore(dest string, keys ...string) (int64, error) {
+	return conn.client.SDiffStore(context.Background(), dest, keys...).Result()
+}
+
+func (conn *Connection) SInter(key ...string) ([]string, error) {
+	return conn.client.SInter(context.Background(), key...).Result()
+}
+
+func (conn *Connection) SInterStore(dest string, keys ...string) (int64, error) {
+	return conn.client.SInterStore(context.Background(), dest, keys...).Result()
+}
+
+func (conn *Connection) SIsMember(key string, member interface{}) (bool, error) {
+	return conn.client.SIsMember(context.Background(), key, member).Result()
+}
+
+func (conn *Connection) SMembers(key string) ([]string, error) {
+	return conn.client.SMembers(context.Background(), key).Result()
+}
+
+func (conn *Connection) SMove(source, dest string, member interface{}) (bool, error) {
+	return conn.client.SMove(context.Background(), source, dest, member).Result()
+}
+
+func (conn *Connection) SPop(key string) (string, error) {
+	return conn.client.SPop(context.Background(), key).Result()
+}
+
+func (conn *Connection) SRandMember(key string) (string, error) {
+	return conn.client.SRandMember(context.Background(), key).Result()
+}
+
+func (conn *Connection) SRandMemberN(key string, count int64) ([]string, error) {
+	return conn.client.SRandMemberN(context.Background(), key, count).Result()
+}
+
+func (conn *Connection) SRem(key string, members ...interface{}) error {
+	return conn.client.SRem(context.Background(), key, members...).Err()
+}
+
+func (conn *Connection) SUnion(keys ...string) ([]string, error) {
+	return conn.client.SUnion(context.Background(), keys...).Result()
+}
+
+func (conn *Connection) SUnionStore(dest string, keys ...string) (int64, error) {
+	return conn.client.SUnionStore(context.Background(), dest, keys...).Result()
+}
+
+func (conn *Connection) SScan(key string, cursor uint64, match string, count int64) ([]string, uint64, error) {
+	return conn.client.SScan(context.Background(), key, cursor, match, count).Result()
 }
 
 func (conn *Connection) Multi(cb contracts.MultiFunc) error {
