@@ -14,7 +14,7 @@ type Cache interface {
 }
 
 type Store interface {
-	Get(key string) interface{}
+	Get(key string) (interface{}, error)
 	Many(keys []string) []interface{}
 	Put(key string, value interface{}, seconds time.Duration) error
 	PutMany(kv map[string]interface{}, seconds int) error

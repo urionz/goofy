@@ -45,8 +45,8 @@ func (tag *TagSet) tagIds() []string {
 }
 
 func (tag *TagSet) TagId(name string) string {
-	storeGet := tag.store.Get(tag.TagKey(name))
-	if storeGet == nil {
+	storeGet, err := tag.store.Get(tag.TagKey(name))
+	if storeGet == nil || err != nil {
 		return tag.ResetTag(name)
 	}
 	return storeGet.(string)

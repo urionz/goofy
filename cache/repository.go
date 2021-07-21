@@ -16,6 +16,10 @@ type Repository struct {
 	BaseRepository
 }
 
+type StanderValue struct {
+	Value interface{} `json:"value"`
+}
+
 var _ contracts.Cache = new(Repository)
 
 func NewRepository(store contracts.Store) *Repository {
@@ -25,7 +29,10 @@ func NewRepository(store contracts.Store) *Repository {
 }
 
 func (repo *Repository) Scan(key string, ptr interface{}, defVal ...interface{}) error {
-	value := repo.store.Get(key)
+	value, err := repo.store.Get(key)
+	if err != nil {
+		return err
+	}
 	if len(defVal) > 0 && (value == nil || refutil.IsBlank(value)) {
 		if closure, ok := defVal[0].(contracts.CacheClosure); ok {
 			value = closure()

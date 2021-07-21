@@ -35,8 +35,12 @@ func NewFileStore(files *filesystem.Filesystem, dir string) *FileStore {
 }
 
 // Retrieve an item from the cache by key.
-func (f *FileStore) Get(key string) interface{} {
-	return f.getPayload(key).Data
+func (f *FileStore) Get(key string) (interface{}, error) {
+	payload, err := f.getPayload(key)
+	if err != nil {
+		return nil, err
+	}
+	return payload.Data, nil
 }
 
 // Store an item in the cache for a given number of seconds.
@@ -69,32 +73,32 @@ func (f *FileStore) Forget(key string) error {
 	return nil
 }
 
-func (f *FileStore) getPayload(key string) *DataPayload {
+func (f *FileStore) getPayload(key string) (*DataPayload, error) {
 	var err error
 	var raw []byte
 	var unpackPayload DataPayload
 	now := carbon.Now()
 	p := f.path(key)
 	if raw, err = f.files.Get(p); err != nil {
-		return f.emptyPayload()
+		return f.emptyPayload(), err
 	}
 
 	if err = json.Unmarshal(raw, &unpackPayload); err != nil {
-		return f.emptyPayload()
+		return f.emptyPayload(), err
 	}
 
 	if unpackPayload.Time != 0 {
 		tsDiff := now.DiffInSeconds(carbon.CreateFromTimestamp(unpackPayload.Time))
 		if tsDiff <= 0 {
 			f.Forget(key)
-			return f.emptyPayload()
+			return f.emptyPayload(), nil
 		}
 	}
 
 	return &DataPayload{
 		Data: unpackPayload.Data,
 		Time: unpackPayload.Time - now.ToTimestamp(),
-	}
+	}, nil
 }
 
 func (f *FileStore) Forever(key string, value interface{}) error {

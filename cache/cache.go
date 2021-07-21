@@ -37,8 +37,8 @@ func (*BaseCache) Has(_ string) bool {
 type BaseStore struct {
 }
 
-func (*BaseStore) Get(_ string) interface{} {
-	return nil
+func (*BaseStore) Get(_ string) (interface{}, error) {
+	return nil, nil
 }
 func (*BaseStore) Many(_ []string) []interface{} {
 	return nil

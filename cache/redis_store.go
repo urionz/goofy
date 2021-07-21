@@ -22,16 +22,16 @@ func NewRedisStore(redis contracts.RedisFactory, prefix, connection string) *Red
 	}
 }
 
-func (r *RedisStore) Get(key string) interface{} {
-	var dst interface{}
+func (r *RedisStore) Get(key string) (interface{}, error) {
+	var standerValue StanderValue
 	value := r.Connection().Get(r.prefix + key)
 	if value == "" {
-		return nil
+		return nil, nil
 	}
-	if err := jsonutil.Decode([]byte(value), &dst); err != nil {
-		return value
+	if err := jsonutil.Decode([]byte(value), &standerValue); err != nil {
+		return value, err
 	}
-	return dst
+	return standerValue.Value, nil
 }
 
 func (r *RedisStore) Set(key string, value interface{}, ttl time.Duration) error {
@@ -41,7 +41,7 @@ func (r *RedisStore) Set(key string, value interface{}, ttl time.Duration) error
 func (r *RedisStore) Put(key string, value interface{}, seconds time.Duration) error {
 	var err error
 	var raw []byte
-	if raw, err = jsonutil.Encode(value); err != nil {
+	if raw, err = jsonutil.Encode(StanderValue{Value: value}); err != nil {
 		return err
 	}
 	return r.Connection().SetEX(key, string(raw), seconds)
