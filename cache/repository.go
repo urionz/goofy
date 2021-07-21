@@ -47,7 +47,7 @@ func (repo *Repository) Scan(key string, ptr interface{}, defVal ...interface{})
 	if err != nil {
 		return err
 	}
-	if err := jsonutil.Decode(b, ptr); err != nil {
+	if err := jsonutil.Decode(b, &ptr); err != nil {
 		return err
 	}
 	return nil
@@ -113,10 +113,10 @@ func (repo *Repository) Remember(key string, ttl time.Duration, callback contrac
 	if err != nil {
 		return err
 	}
-	if err := jsonutil.Decode(b, ptr); err != nil {
+	if err := jsonutil.Decode(b, &ptr); err != nil {
 		return err
 	}
-	if err := repo.Put(key, ptr, ttl); err != nil {
+	if err := repo.Put(key, value, ttl); err != nil {
 		return err
 	}
 	return nil
@@ -132,18 +132,16 @@ func (repo *Repository) RememberForever(key string, callback contracts.CacheClos
 			return nil
 		}
 	}
-
 	value := callback()
 	b, err := jsonutil.Encode(value)
 	if err != nil {
 		return err
 	}
-	if err := jsonutil.Decode(b, ptr); err != nil {
+	if err := jsonutil.Decode(b, &ptr); err != nil {
 		return err
 	}
-	if err := repo.Forever(key, string(b)); err != nil {
+	if err := repo.Forever(key, value); err != nil {
 		return err
 	}
-
 	return nil
 }

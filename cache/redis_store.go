@@ -44,11 +44,11 @@ func (r *RedisStore) Put(key string, value interface{}, seconds time.Duration) e
 	if raw, err = jsonutil.Encode(StanderValue{Value: value}); err != nil {
 		return err
 	}
-	return r.Connection().SetEX(key, string(raw), seconds)
+	return r.Connection().Set(key, string(raw), seconds)
 }
 
 func (r *RedisStore) Forever(key string, value interface{}) error {
-	return r.Connection().Set(key, value, 0)
+	return r.Set(key, value, 0)
 }
 
 func (r *RedisStore) Forget(key string) error {
