@@ -8,7 +8,6 @@ import (
 	"path"
 
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/netutil"
 	"github.com/kataras/iris/v12/middleware/logger"
 	irisRecover "github.com/kataras/iris/v12/middleware/recover"
 	"github.com/kataras/iris/v12/middleware/requestid"
@@ -111,18 +110,13 @@ func (e *Server) Handle(app contracts.Application) *command.Command {
 				addr, iris.WithOptimizations,
 				iris.WithConfiguration(iris.Configuration{
 					DisableStartupLog:      true,
-					RemoteAddrHeadersForce: true,
-					RemoteAddrPrivateSubnets: []netutil.IPRange{
-						{
-							Start: "10.0.0.0",
-							End:   "10.255.255.255",
-						},
-						{
-							Start: "192.168.0.0",
-							End:   "192.168.255.255",
-						},
+					RemoteAddrHeadersForce: false,
+					RemoteAddrHeaders: []string{
+						"X-Real-Ip",
+						"X-Forwarded-For",
+						"CF-Connecting-IP",
+						"True-Client-Ip",
 					},
-					RemoteAddrHeaders: []string{"X-Forwarded-For"},
 				}),
 			)
 		},
