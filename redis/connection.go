@@ -42,6 +42,10 @@ func (conn *Connection) ExpireAt(key string, tm time.Time) error {
 	return conn.client.ExpireAt(context.Background(), key, tm).Err()
 }
 
+func (conn *Connection) Exists(key string) bool {
+	return conn.client.Exists(context.Background(), key).Val() != 0
+}
+
 func (conn *Connection) Get(key string) string {
 	return conn.client.Get(context.Background(), key).Val()
 }

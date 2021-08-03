@@ -28,6 +28,8 @@ type RedisConnection interface {
 	Del(keys ...string) error
 	SetEX(key string, value interface{}, expiration time.Duration) error
 
+	Exists(key string) bool
+
 	Expire(key string, exp time.Duration) error
 	ExpireAt(key string, tm time.Time) error
 

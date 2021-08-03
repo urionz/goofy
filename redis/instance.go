@@ -21,6 +21,10 @@ func Multi(cb contracts.MultiFunc, conn ...string) error {
 	return Conn(conn...).Multi(cb)
 }
 
+func Exists(key string, conn ...string) bool {
+	return Conn(conn...).Exists(key)
+}
+
 func Get(key string, conn ...string) string {
 	return Conn(conn...).Get(key)
 }
