@@ -104,9 +104,7 @@ func (model *Model) GetLastBatchNumber() (int, error) {
 
 func NewDBMigration(db *gorm.DB) *Model {
 	var migration Model
-	if !db.Migrator().HasTable(&migration) {
-		db.Migrator().AutoMigrate(&migration)
-	}
+	db.Migrator().AutoMigrate(&migration)
 	migration.DB = db
 	return &migration
 }
