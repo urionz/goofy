@@ -528,9 +528,8 @@ func RunUp(file contracts.MigrateFile, batch int) error {
 	repository := &Model{
 		DB: conn,
 	}
-	name := GetMigrationName(file)
 
-	color.Infoln("Migrating:", name)
+	color.Infoln("Migrating:", file.Filename())
 
 	if err := file.Up(conn); err != nil {
 		return err
@@ -539,7 +538,7 @@ func RunUp(file contracts.MigrateFile, batch int) error {
 		return err
 	}
 
-	color.Infoln("Migrated:", name)
+	color.Infoln("Migrated:", file.Filename())
 
 	return nil
 }
@@ -655,7 +654,7 @@ func RollbackMigrations(migrations []*Model) error {
 		file, exists := existsFileMigrates(migration)
 
 		if !exists {
-			color.Warnln("Migration not found:", migration.Migration)
+			color.Warnln("Migration not found:", migration.Filename)
 			continue
 		}
 
@@ -672,9 +671,7 @@ func RunDown(file contracts.MigrateFile, migration *Model) (err error) {
 		DB: conn,
 	}
 
-	name := GetMigrationName(file)
-
-	color.Infoln("Rolling back:", name)
+	color.Infoln("Rolling back:", file.Filename())
 
 	if err := file.Down(conn); err != nil {
 		return err
@@ -684,7 +681,7 @@ func RunDown(file contracts.MigrateFile, migration *Model) (err error) {
 		return err
 	}
 
-	color.Infoln("Rolled back:", name)
+	color.Infoln("Rolled back:", file.Filename())
 
 	return nil
 }
