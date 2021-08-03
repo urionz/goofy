@@ -49,6 +49,10 @@ func (table *{{ .StructName }}) MigrateTimestamp() int {
 	return {{ .Timestamp }}
 }
 
+func (table *{{ .StructName }}) Filename() string {
+	return {{ .Filename }}
+}
+
 func (table *{{ .StructName }}) Up(db *gorm.DB) error {
 	if !db.Migrator().HasTable(table) {
 		return db.Migrator().CreateTable(table)
@@ -156,6 +160,30 @@ func Migrate(app contracts.Application) *command.Command {
 			}
 
 			if err := RunMigrate(step); err != nil {
+				color.Warnln(err)
+				return nil
+			}
+			return nil
+		},
+	}
+
+	return cmd
+}
+
+func MigrateFix(app contracts.Application) *command.Command {
+	cmd := &command.Command{
+		Name: "migrate-fix",
+		Desc: "修复迁移文件名称",
+		Config: func(c *command.Command) {
+			c.StrOpt(&driver, "conn", "", "", "指定数据库连接")
+		},
+		Func: func(c *command.Command, args []string) error {
+			if err := SwitchDBConnection(app); err != nil {
+				color.Warnln(err)
+				return nil
+			}
+
+			if err := RunMigrateFix(); err != nil {
 				color.Warnln(err)
 				return nil
 			}
@@ -434,7 +462,7 @@ func WriteMigration(name, table, generatePath string, isCreate bool) error {
 		}
 	}
 
-	stubString, err := populateStub(stub, table)
+	stubString, err := populateStub(stub, table, name)
 
 	if err != nil {
 		return err
@@ -449,7 +477,7 @@ func WriteMigration(name, table, generatePath string, isCreate bool) error {
 	return nil
 }
 
-func populateStub(stub, table string) (string, error) {
+func populateStub(stub, table, name string) (string, error) {
 	var templateBuffer bytes.Buffer
 	tpl, err := template.New("migration").Parse(stub)
 	if err != nil {
@@ -459,6 +487,7 @@ func populateStub(stub, table string) (string, error) {
 	if err := tpl.ExecuteTemplate(&templateBuffer, "migration", map[string]interface{}{
 		"StructName": strings.ToUpper(strutil.RandomChars(6)),
 		"TableName":  table,
+		"Filename":   strings.ToLower(name),
 		"Timestamp":  carbon.Now().ToTimestamp(),
 	}); err != nil {
 		return templateBuffer.String(), err
@@ -506,7 +535,7 @@ func RunUp(file contracts.MigrateFile, batch int) error {
 	if err := file.Up(conn); err != nil {
 		return err
 	}
-	if err := repository.Log(GetMigrationName(file), batch); err != nil {
+	if err := repository.Log(GetMigrationName(file), file.Filename(), batch); err != nil {
 		return err
 	}
 
@@ -540,6 +569,18 @@ func RunReset() error {
 	}
 
 	return RollbackMigrations(migrations)
+}
+
+func RunMigrateFix() error {
+	repository := &Model{
+		DB: conn,
+	}
+	migrateFiles := GetMigrationFiles()
+	for _, migrateFile := range migrateFiles {
+		if err := repository.FixFilename(GetMigrationName(migrateFile), migrateFile.Filename()); err != nil {
+			return err
+		}
+	}
 }
 
 func RunMigrate(step int) error {

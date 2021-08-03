@@ -15,6 +15,7 @@ type DBConnection interface {
 
 type MigrateFile interface {
 	MigrateTimestamp() int
+	Filename() string
 	TableName() string
 	Up(db *gorm.DB) error
 	Down(db *gorm.DB) error

@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 type Model struct {
 	Id        int
 	Migration string
+	Filename  string
 	Batch     int
 	*gorm.DB  `gorm:"-"`
 }
@@ -66,10 +67,15 @@ func (model *Model) GetMigrationBatches() (map[string]int, error) {
 	return batchesMap, nil
 }
 
-func (model *Model) Log(migrationName string, batch int) error {
+func (model *Model) FixFilename(migrationName, filename string) error {
+	return model.Where("migration = ?", migrationName).Update("filename", filename).Error
+}
+
+func (model *Model) Log(migrationName, filename string, batch int) error {
 	var migration Model
 	migration.Migration = migrationName
 	migration.Batch = batch
+	migration.Filename = filename
 	return model.Create(&migration).Error
 }
 
@@ -99,7 +105,7 @@ func (model *Model) GetLastBatchNumber() (int, error) {
 func NewDBMigration(db *gorm.DB) *Model {
 	var migration Model
 	if !db.Migrator().HasTable(&migration) {
-		db.Migrator().CreateTable(&migration)
+		db.Migrator().AutoMigrate(&migration)
 	}
 	migration.DB = db
 	return &migration
