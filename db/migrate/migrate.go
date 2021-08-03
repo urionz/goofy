@@ -68,7 +68,7 @@ func (model *Model) GetMigrationBatches() (map[string]int, error) {
 }
 
 func (model *Model) FixFilename(migrationName, filename string) error {
-	return model.Where("migration = ?", migrationName).Update("filename", filename).Error
+	return model.Model(model).Where("migration = ?", migrationName).Update("filename", filename).Error
 }
 
 func (model *Model) Log(migrationName, filename string, batch int) error {
