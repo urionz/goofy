@@ -572,9 +572,7 @@ func RunReset() error {
 }
 
 func RunMigrateFix() error {
-	repository := &Model{
-		DB: conn,
-	}
+	repository := NewDBMigration(conn)
 	migrateFiles := GetMigrationFiles()
 	for _, migrateFile := range migrateFiles {
 		if err := repository.FixFilename(GetMigrationName(migrateFile), migrateFile.Filename()); err != nil {
