@@ -581,6 +581,7 @@ func RunMigrateFix() error {
 			return err
 		}
 	}
+	return nil
 }
 
 func RunMigrate(step int) error {
