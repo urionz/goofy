@@ -25,6 +25,14 @@ func Exists(key string, conn ...string) bool {
 	return Conn(conn...).Exists(key)
 }
 
+func Del(keys []string, conn ...string) error {
+	return Conn(conn...).Del(keys...)
+}
+
+func Keys(pattern string, conn ...string) []string {
+	return Conn(conn...).Keys(pattern)
+}
+
 func Get(key string, conn ...string) string {
 	return Conn(conn...).Get(key)
 }
@@ -85,8 +93,8 @@ func ZCount(key, min, max string, conn ...string) (int64, error) {
 	return Conn(conn...).ZCount(key, min, max)
 }
 
-func ZRem(key, min, max string, conn ...string) (int64, error) {
-	return Conn(conn...).ZRem(key, min, max)
+func ZRem(key string, members []interface{}, conn ...string) (int64, error) {
+	return Conn(conn...).ZRem(key, members...)
 }
 
 func ZRemRangeByLex(key, min, max string, conn ...string) (int64, error) {

@@ -34,6 +34,10 @@ func (conn *Connection) Client() *contracts.RedisClient {
 	return conn.client
 }
 
+func (conn *Connection) Keys(pattern string) []string {
+	return conn.client.Keys(context.Background(), pattern).Val()
+}
+
 func (conn *Connection) Expire(key string, exp time.Duration) error {
 	return conn.client.Expire(context.Background(), key, exp).Err()
 }
@@ -124,8 +128,8 @@ func (conn *Connection) ZRank(key, member string) (int64, error) {
 	return conn.client.ZRank(context.Background(), key, member).Result()
 }
 
-func (conn *Connection) ZRem(key, min, max string) (int64, error) {
-	return conn.client.ZRem(context.Background(), key, min, max).Result()
+func (conn *Connection) ZRem(key string, members ...interface{}) (int64, error) {
+	return conn.client.ZRem(context.Background(), key, members).Result()
 }
 
 func (conn *Connection) ZRemRangeByLex(key, min, max string) (int64, error) {

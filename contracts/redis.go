@@ -23,6 +23,7 @@ type (
 type RedisConnection interface {
 	GetName() string
 	Client() *RedisClient
+	Keys(pattern string) []string
 	Get(key string) string
 	Set(key string, value interface{}, expiration time.Duration) error
 	Del(keys ...string) error
@@ -48,7 +49,7 @@ type RedisConnection interface {
 	ZRange(key string, start, stop int64) ([]string, error)
 	ZRangeByLex(key string, opt *ZRangeBy) ([]string, error)
 	ZRangeByScore(key string, opt *ZRangeBy) ([]string, error)
-	ZRem(key, min, max string) (int64, error)
+	ZRem(key string, members ...interface{}) (int64, error)
 	ZRemRangeByLex(key, min, max string) (int64, error)
 	ZRemRangeByRank(key string, start, stop int64) (int64, error)
 	ZRemRangeByScore(key, min, max string) (int64, error)
