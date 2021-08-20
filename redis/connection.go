@@ -129,7 +129,7 @@ func (conn *Connection) ZRank(key, member string) (int64, error) {
 }
 
 func (conn *Connection) ZRem(key string, members ...interface{}) (int64, error) {
-	return conn.client.ZRem(context.Background(), key, members).Result()
+	return conn.client.ZRem(context.Background(), key, members...).Result()
 }
 
 func (conn *Connection) ZRemRangeByLex(key, min, max string) (int64, error) {
