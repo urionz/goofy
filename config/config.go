@@ -38,7 +38,7 @@ func (c *Configure) Object(key string, findByPath ...bool) contracts.Config {
 	}
 }
 
-func (c *Configure) Strings(key string, defVal ...string) goutil.Strings {
+func (c *Configure) Strings(key string, defVal ...string) []string {
 	val := serve.Config.Strings(key)
 	if len(val) == 0 && len(defVal) > 0 {
 		return defVal
@@ -76,7 +76,11 @@ func String(key string, defVal ...string) string {
 	return serve.String(key, defVal...)
 }
 
-func Strings(key string, defVal ...string) goutil.Strings {
+func Strings(key string, defVal ...string) []string {
+	return serve.Strings(key, defVal...)
+}
+
+func GoStrings(key string, defVal ...string) goutil.Strings {
 	return serve.Strings(key, defVal...)
 }
 

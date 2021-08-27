@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/golang-module/carbon"
@@ -83,6 +84,10 @@ type {{ .StructName }} struct {
 
 func (table *{{ .StructName }}) MigrateTimestamp() int {
 	return {{ .Timestamp }}
+}
+
+func (table *{{ .StructName }}) Filename() string {
+	return {{ .Filename }}
 }
 
 func (table *{{ .StructName }}) TableName() string {
@@ -449,7 +454,7 @@ func getStub(isCreate bool) string {
 func WriteMigration(name, table, generatePath string, isCreate bool) error {
 	stub := getStub(isCreate)
 
-	filePath := path.Join(generatePath, strings.ToLower(name)+".go")
+	filePath := path.Join(generatePath, time.Now().Format("2006_01_02_150405_")+strings.ToLower(name)+".go")
 
 	if fsutil.FileExists(filePath) {
 		cover := false
