@@ -7,29 +7,19 @@ import (
 	"github.com/urionz/goofy"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/event"
-	"github.com/urionz/goofy/schedule"
 	"github.com/urionz/goofy/web"
 	"github.com/urionz/goofy/web/context"
 	"github.com/urionz/goofy/web/validation"
 )
 
 func main() {
-	goofy.Default.AddListeners(event.Listeners{
-		"aaa": []event.Listener{
-			goofy.ListenerFunc(func(e event.Event) error {
-				panic("hahahahah")
-				return nil
-			}),
-		},
-	}).AddSchedules(schedule.Job{
-		"* * * * *": goofy.Jobs(func() {
-			fmt.Println("*****")
-		}),
-	}).AddServices(
-		func(conf contracts.Config) {
-			fmt.Println(conf.Strings("filesystems.disks.cos.content_detect_type"))
-		},
-	).Run()
+	// fd, _ := os.Open("./config.dev.toml")
+	// b, _ := ioutil.ReadAll(fd)
+	// fmt.Println(string(b))
+	// fmt.Println(string([]byte(`mobiles = ["1", "2", "3", "4"]`)))
+	goofy.Default.AddServices(func(conf contracts.Config) {
+		fmt.Println(conf.Object("debug").Strings("mobiles"))
+	}).Run()
 }
 
 type Test struct {
