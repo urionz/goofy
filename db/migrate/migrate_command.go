@@ -51,7 +51,7 @@ func (table *{{ .StructName }}) MigrateTimestamp() int {
 }
 
 func (table *{{ .StructName }}) Filename() string {
-	return {{ .Filename }}
+	return "{{ .Filename }}"
 }
 
 func (table *{{ .StructName }}) Up(db *gorm.DB) error {
@@ -87,7 +87,7 @@ func (table *{{ .StructName }}) MigrateTimestamp() int {
 }
 
 func (table *{{ .StructName }}) Filename() string {
-	return {{ .Filename }}
+	return "{{ .Filename }}"
 }
 
 func (table *{{ .StructName }}) TableName() string {
