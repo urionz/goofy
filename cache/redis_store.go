@@ -55,6 +55,10 @@ func (r *RedisStore) Forget(key string) error {
 	return r.Connection().Del(key)
 }
 
+func (r *RedisStore) Has(key string) bool {
+	return r.Connection().Exists(key)
+}
+
 func (r *RedisStore) Tags(names ...string) (contracts.TaggableStore, error) {
 	return NewRedisTaggedCache(r, NewTagSet(r, names...)), nil
 }

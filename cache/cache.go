@@ -64,6 +64,9 @@ func (*BaseStore) Forget(_ string) error {
 func (*BaseStore) Flush() error {
 	return nil
 }
+func (*BaseStore) Has(_ string) bool {
+	return false
+}
 func (*BaseStore) GetPrefix() string {
 	return ""
 }

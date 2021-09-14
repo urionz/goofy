@@ -105,6 +105,13 @@ func (f *FileStore) Forever(key string, value interface{}) error {
 	return f.Put(key, value, 0)
 }
 
+func (f *FileStore) Has(key string) bool {
+	if file := f.path(key); f.files.Exists(file) {
+		return true
+	}
+	return false
+}
+
 func (f *FileStore) emptyPayload() *DataPayload {
 	return new(DataPayload)
 }

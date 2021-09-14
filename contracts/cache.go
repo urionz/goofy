@@ -22,6 +22,7 @@ type Store interface {
 	Decrement(key string, value ...int) error
 	Forever(key string, value interface{}) error
 	Forget(key string) error
+	Has(key string) bool
 	ItemKey(key string) string
 	Flush() error
 	GetPrefix() string

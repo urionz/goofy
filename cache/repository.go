@@ -145,3 +145,7 @@ func (repo *Repository) RememberForever(key string, callback contracts.CacheClos
 	}
 	return nil
 }
+
+func (repo *Repository) Has(key string) bool {
+	return repo.store.Has(key)
+}
