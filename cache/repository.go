@@ -20,7 +20,7 @@ type StanderValue struct {
 	Value interface{} `json:"value"`
 }
 
-var _ contracts.Cache = new(Repository)
+var _ contracts.Cache = (*Repository)(nil)
 
 func NewRepository(store contracts.Store) *Repository {
 	return &Repository{
@@ -35,13 +35,16 @@ func (repo *Repository) Scan(key string, ptr interface{}, defVal ...interface{})
 	}
 	if len(defVal) > 0 && (value == nil || refutil.IsBlank(value)) {
 		if closure, ok := defVal[0].(contracts.CacheClosure); ok {
-			value = closure()
+			value, err = closure()
+			if err != nil {
+				return err
+			}
 		} else {
 			value = defVal[0]
 		}
 	}
 	if value == nil {
-		return fmt.Errorf("the key %s is not found", key)
+		return fmt.Errorf("the key %s is not found. err %s", key, err.Error())
 	}
 	b, err := jsonutil.Encode(value)
 	if err != nil {
@@ -108,7 +111,10 @@ func (repo *Repository) Remember(key string, ttl time.Duration, callback contrac
 			return nil
 		}
 	}
-	value := callback()
+	value, err := callback()
+	if err != nil {
+		return err
+	}
 	b, err := jsonutil.Encode(value)
 	if err != nil {
 		return err
@@ -132,7 +138,10 @@ func (repo *Repository) RememberForever(key string, callback contracts.CacheClos
 			return nil
 		}
 	}
-	value := callback()
+	value, err := callback()
+	if err != nil {
+		return err
+	}
 	b, err := jsonutil.Encode(value)
 	if err != nil {
 		return err

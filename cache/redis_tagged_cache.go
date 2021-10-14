@@ -18,7 +18,7 @@ type RedisTaggedCache struct {
 	TaggedCache
 }
 
-var _ contracts.TaggableStore = new(RedisTaggedCache)
+var _ contracts.TaggableStore = (*RedisTaggedCache)(nil)
 
 func NewRedisTaggedCache(store *RedisStore, tags *TagSet) *RedisTaggedCache {
 	r := new(RedisTaggedCache)

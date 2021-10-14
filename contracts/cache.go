@@ -28,7 +28,7 @@ type Store interface {
 	GetPrefix() string
 }
 
-type CacheClosure = func() interface{}
+type CacheClosure = func() (interface{}, error)
 
 type CacheRepository interface {
 	Cache

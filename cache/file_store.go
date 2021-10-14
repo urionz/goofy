@@ -24,7 +24,7 @@ type DataPayload struct {
 	Time int64       `json:"time"`
 }
 
-var _ contracts.Store = new(FileStore)
+var _ contracts.Store = (*FileStore)(nil)
 
 // Create a new file cache store instance.
 func NewFileStore(files *filesystem.Filesystem, dir string) *FileStore {

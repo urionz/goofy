@@ -25,7 +25,7 @@ type Manager struct {
 	stores      sync.Map
 }
 
-var _ contracts.CacheFactory = new(Manager)
+var _ contracts.CacheFactory = (*Manager)(nil)
 
 func NewManager(app contracts.Application, conf contracts.Config) *Manager {
 	manager := &Manager{
