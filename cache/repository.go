@@ -107,6 +107,15 @@ func (repo *Repository) Forget(key string) error {
 
 func (repo *Repository) Remember(key string, ttl time.Duration, callback contracts.CacheClosure, ptr interface{}, force ...bool) error {
 	if len(force) <= 0 || !force[0] {
+		if !repo.Has(key) {
+			value, err := callback()
+			if err != nil {
+				return err
+			}
+			if err := repo.Put(key, value, ttl); err != nil {
+				return err
+			}
+		}
 		if err := repo.Scan(key, ptr); err == nil {
 			return nil
 		}
@@ -134,6 +143,15 @@ func (repo *Repository) Sear(key string, callback contracts.CacheClosure, ptr in
 
 func (repo *Repository) RememberForever(key string, callback contracts.CacheClosure, ptr interface{}, force ...bool) error {
 	if len(force) <= 0 || !force[0] {
+		if !repo.Has(key) {
+			value, err := callback()
+			if err != nil {
+				return err
+			}
+			if err := repo.Forever(key, value); err != nil {
+				return err
+			}
+		}
 		if err := repo.Scan(key, ptr); err == nil {
 			return nil
 		}
