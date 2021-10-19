@@ -30,7 +30,6 @@ func NewRepository(store contracts.Store) *Repository {
 
 func (repo *Repository) Scan(key string, ptr interface{}, defVal ...interface{}) error {
 	value, err := repo.store.Get(key)
-	fmt.Println("????????????????", value, err)
 	if err != nil {
 		return err
 	}
@@ -44,10 +43,8 @@ func (repo *Repository) Scan(key string, ptr interface{}, defVal ...interface{})
 			value = defVal[0]
 		}
 	}
-	fmt.Println("????????????????2", value, err)
 	if value == nil {
-		fmt.Println("--------------------", value)
-		return fmt.Errorf("the key %s is not found. err %s", key, err.Error())
+		return fmt.Errorf("the key %s is not found. err %v", key, err)
 	}
 	b, err := jsonutil.Encode(value)
 	if err != nil {
