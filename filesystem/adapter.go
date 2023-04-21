@@ -1,7 +1,6 @@
 package filesystem
 
 import (
-	"encoding/json"
 	"io"
 	"mime/multipart"
 	"os"
@@ -59,12 +58,20 @@ func (a *Adapter) CallMethod(name string, args ...interface{}) []interface{} {
 	return output
 }
 
-func (a *Adapter) Unmarshal(path string, data interface{}, unmarshaler ...contracts.FileUnmarshaler) error {
-	fn := json.Unmarshal
-	if len(unmarshaler) > 0 {
-		fn = unmarshaler[0]
+func (a *Adapter) Unmarshal(path string, ptr interface{}, fn contracts.FileUnmarshalFunc) error {
+	content, err := a.driver.Get(path)
+	if err != nil {
+		return err
 	}
-	return a.driver.Unmarshal(path, data, fn)
+	return fn(content, ptr)
+}
+
+func (a *Adapter) MarshalPut(path string, data interface{}, fn contracts.FileMarshalFunc) (string, error) {
+	content, err := fn(data)
+	if err != nil {
+		return "", err
+	}
+	return a.driver.Put(path, content)
 }
 
 func (a *Adapter) Url(path string) string {

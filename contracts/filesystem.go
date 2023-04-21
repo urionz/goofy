@@ -23,7 +23,8 @@ type PluginValue struct {
 	Value  reflect.Value
 }
 
-type FileUnmarshaler func(data []byte, ptr interface{}) error
+type FileUnmarshalFunc func(data []byte, ptr interface{}) error
+type FileMarshalFunc func(data interface{}) ([]byte, error)
 
 type Filesystem interface {
 	Cloud
@@ -34,7 +35,8 @@ type Filesystem interface {
 	// get the file contents
 	Get(path string) ([]byte, error)
 	// Unmarshal .
-	Unmarshal(path string, ptr interface{}, unmarshaler ...FileUnmarshaler) error
+	Unmarshal(path string, ptr interface{}, fn FileUnmarshalFunc) error
+	MarshalPut(path string, data interface{}, fn FileMarshalFunc) (string, error)
 	// write the contents of a file
 	Put(path string, contents []byte) (string, error)
 	// Write a new file using a stream.

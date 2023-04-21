@@ -37,14 +37,6 @@ func NewLocalDriver(prefix string, conf contracts.Config) *LocalDriver {
 	}
 }
 
-func (l *LocalDriver) Unmarshal(p string, ptr interface{}, unmarshaler ...contracts.FileUnmarshaler) error {
-	content, err := l.Get(p)
-	if err != nil {
-		return err
-	}
-	return unmarshaler[0](content, ptr)
-}
-
 func (l *LocalDriver) Url(path string) string {
 	return fmt.Sprintf("%s/%s", strings.TrimRight(l.conf.String("url"), "/"), l.applyPathPrefix(path))
 }
