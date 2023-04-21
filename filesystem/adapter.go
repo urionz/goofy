@@ -59,19 +59,11 @@ func (a *Adapter) CallMethod(name string, args ...interface{}) []interface{} {
 }
 
 func (a *Adapter) Unmarshal(path string, ptr interface{}, fn contracts.FileUnmarshalFunc) error {
-	content, err := a.driver.Get(path)
-	if err != nil {
-		return err
-	}
-	return fn(content, ptr)
+	return a.driver.Unmarshal(path, ptr, fn)
 }
 
 func (a *Adapter) MarshalPut(path string, data interface{}, fn contracts.FileMarshalFunc) (string, error) {
-	content, err := fn(data)
-	if err != nil {
-		return "", err
-	}
-	return a.driver.Put(path, content)
+	return a.driver.MarshalPut(path, data, fn)
 }
 
 func (a *Adapter) Url(path string) string {
