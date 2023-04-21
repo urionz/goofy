@@ -1,6 +1,7 @@
 package goofy
 
 import (
+	"fmt"
 	"github.com/urionz/goofy/contracts"
 	"github.com/urionz/goofy/event"
 	"github.com/urionz/goofy/log"
@@ -37,13 +38,13 @@ func Listeners(listeners ...event.Listener) []event.Listener {
 	return listeners
 }
 
-func ListenerFunc(fn func(event.Event) error) event.ListenerFunc {
+func ListenerFunc(fn event.ArgsListenerFunc, args ...interface{}) event.ListenerFunc {
 	return func(e event.Event) error {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Error(err)
+				log.Error(fmt.Errorf("%s event = %s data = %+v", err, e.Name(), e.Data()))
 			}
 		}()
-		return fn(e)
+		return fn(e, args...)
 	}
 }

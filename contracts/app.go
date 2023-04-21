@@ -1,6 +1,7 @@
 package contracts
 
 import (
+	"context"
 	"github.com/goava/di"
 	"github.com/urionz/goofy/event"
 	"github.com/urionz/goofy/schedule"
@@ -18,6 +19,7 @@ const (
 type Application interface {
 	AddSchedules(scheduleJob schedule.Job) Application
 	AddServices(services ...interface{}) Application
+	RegisterServices(services ...interface{}) error
 	AddCommanders(commander ...Commander) Application
 	AddListeners(eventListeners event.Listeners) Application
 	Dispatch(name string, payload event.M, fn ...func(error)) Application
@@ -39,4 +41,8 @@ type Application interface {
 
 type DynamicConf interface {
 	DynamicConf(app Application, conf Config) error
+}
+
+type Closer interface {
+	Close(ctx context.Context) error
 }

@@ -12,10 +12,10 @@ func (app *Application) AddSchedules(scheduleJob schedule.Job) contracts.Applica
 		for _, job := range jobs {
 			switch j := job.(type) {
 			case schedule.FuncJob:
-				app.AddJob(spec, j)
+				_, _ = app.AddJob(spec, j)
 				break
 			case func():
-				app.AddFunc(spec, j)
+				_, _ = app.AddFunc(spec, j)
 				break
 			default:
 				app.addError(fmt.Errorf("this %+v type is not support", j))

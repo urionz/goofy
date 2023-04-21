@@ -1,12 +1,17 @@
 package goofy
 
 import (
+	stdContext "context"
+	"fmt"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/goava/di"
 	"github.com/gookit/event"
@@ -71,15 +76,41 @@ func New(options ...Option) *Application {
 		option.apply(app)
 	}
 
+	go func() {
+		ch := make(chan os.Signal, 1)
+		signal.Notify(ch, os.Interrupt, syscall.SIGINT, os.Kill, syscall.SIGKILL, syscall.SIGTERM)
+		select {
+		case <-ch:
+			fmt.Println("shutdown...")
+			timeout := 10 * time.Second
+			ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+			defer cancel()
+			if err := app.Close(ctx); err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+
 	return app
+}
+
+func (app *Application) Close(ctx stdContext.Context) error {
+	var closers []contracts.Closer
+	return app.Container.Iterate(&closers, func(tags di.Tags, loader di.ValueFunc) error {
+		i, _ := loader()
+		if provider, ok := i.(contracts.Closer); ok {
+			return provider.Close(ctx)
+		}
+
+		return nil
+	})
 }
 
 func (app *Application) DynamicConf(conf contracts.Config) error {
 	var services []contracts.DynamicConf
 	return app.Container.Iterate(&services, func(tags di.Tags, loader di.ValueFunc) error {
 		i, _ := loader()
-		i.(contracts.DynamicConf).DynamicConf(app, conf)
-		return nil
+		return i.(contracts.DynamicConf).DynamicConf(app, conf)
 	})
 }
 
@@ -159,7 +190,7 @@ func (app *Application) resolveInputsFromDI(service interface{}) ([]reflect.Valu
 	}
 
 	if len(os.Args) > 0 && !strings.HasSuffix(os.Args[0], "test") {
-		app.App.GlobalFlags().Parse(os.Args[1:])
+		_ = app.App.GlobalFlags().Parse(os.Args[1:])
 	}
 
 	return valueOf.Call(inputs), nil
