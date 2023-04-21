@@ -23,6 +23,8 @@ type PluginValue struct {
 	Value  reflect.Value
 }
 
+type FileUnmarshaler func(data []byte, ptr interface{}) error
+
 type Filesystem interface {
 	Cloud
 	// determine if a file exists
@@ -31,6 +33,8 @@ type Filesystem interface {
 	GetFile(path string) (*os.File, error)
 	// get the file contents
 	Get(path string) ([]byte, error)
+	// Unmarshal .
+	Unmarshal(path string, ptr interface{}, unmarshaler ...FileUnmarshaler) error
 	// write the contents of a file
 	Put(path string, contents []byte) (string, error)
 	// Write a new file using a stream.
