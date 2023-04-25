@@ -158,3 +158,10 @@ func (repo *Repository) RememberForever(key string, callback contracts.CacheClos
 func (repo *Repository) Has(key string) bool {
 	return repo.store.Has(key)
 }
+
+func (repo *Repository) Increment(key string, steps ...int) error {
+	return repo.store.Increment(key, steps...)
+}
+func (repo *Repository) Decrement(key string, steps ...int) error {
+	return repo.store.Decrement(key, steps...)
+}
