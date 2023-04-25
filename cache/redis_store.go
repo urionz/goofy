@@ -47,7 +47,7 @@ func (r *RedisStore) Put(key string, value interface{}, seconds time.Duration) e
 	return r.Connection().Set(key, string(raw), seconds)
 }
 
-func (r *RedisStore) PutInt(key string, value int64, seconds time.Duration) error {
+func (r *RedisStore) PutPure(key string, value interface{}, seconds time.Duration) error {
 	return r.Connection().Set(key, value, seconds)
 }
 
@@ -55,8 +55,8 @@ func (r *RedisStore) Forever(key string, value interface{}) error {
 	return r.Set(key, value, 0)
 }
 
-func (r *RedisStore) ForeverInt(key string, value int64) error {
-	return r.PutInt(key, value, 0)
+func (r *RedisStore) ForeverPure(key string, value interface{}) error {
+	return r.PutPure(key, value, 0)
 }
 
 func (r *RedisStore) Forget(key string) error {

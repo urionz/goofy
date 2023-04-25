@@ -17,12 +17,12 @@ type Store interface {
 	Get(key string) (interface{}, error)
 	Many(keys []string) []interface{}
 	Put(key string, value interface{}, seconds time.Duration) error
-	PutInt(key string, value int64, seconds time.Duration) error
+	PutPure(key string, value interface{}, seconds time.Duration) error
 	PutMany(kv map[string]interface{}, seconds int) error
 	Increment(key string, value ...int64) error
 	Decrement(key string, value ...int64) error
 	Forever(key string, value interface{}) error
-	ForeverInt(key string, value int64) error
+	ForeverPure(key string, value interface{}) error
 	Forget(key string) error
 	Has(key string) bool
 	ItemKey(key string) string

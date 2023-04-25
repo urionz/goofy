@@ -19,14 +19,6 @@ type FileStore struct {
 	BaseStore
 }
 
-func (f *FileStore) PutInt(key string, value int64, seconds time.Duration) error {
-	panic("implement me")
-}
-
-func (f *FileStore) ForeverInt(key string, value int64) error {
-	panic("implement me")
-}
-
 type DataPayload struct {
 	Data interface{} `json:"data"`
 	Time int64       `json:"time"`
@@ -49,6 +41,14 @@ func (f *FileStore) Get(key string) (interface{}, error) {
 		return nil, err
 	}
 	return payload.Data, nil
+}
+
+func (f *FileStore) ForeverPure(key string, value interface{}) error {
+	panic("implement me")
+}
+
+func (f *FileStore) PutPure(key string, data interface{}, seconds time.Duration) error {
+	panic("implement me")
 }
 
 // Store an item in the cache for a given number of seconds.
