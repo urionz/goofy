@@ -112,6 +112,13 @@ func (f *FileStore) Has(key string) bool {
 	return false
 }
 
+func (f *FileStore) Increment(key string, steps ...int) error {
+	panic("not implement")
+}
+func (f *FileStore) Decrement(key string, steps ...int) error {
+	panic("not implement")
+}
+
 func (f *FileStore) emptyPayload() *DataPayload {
 	return new(DataPayload)
 }

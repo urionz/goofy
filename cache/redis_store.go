@@ -63,6 +63,21 @@ func (r *RedisStore) Tags(names ...string) (contracts.TaggableStore, error) {
 	return NewRedisTaggedCache(r, NewTagSet(r, names...)), nil
 }
 
+func (r *RedisStore) Increment(key string, steps ...int) error {
+	step := 1
+	if len(steps) == 0 {
+		step = steps[0]
+	}
+	return r.Connection().IncrBy(key, int64(step))
+}
+func (r *RedisStore) Decrement(key string, steps ...int) error {
+	step := 1
+	if len(steps) == 0 {
+		step = steps[0]
+	}
+	return r.Connection().DecrBy(key, int64(step))
+}
+
 func (r *RedisStore) ItemKey(key string) string {
 	return key
 }
