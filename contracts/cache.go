@@ -37,10 +37,12 @@ type CacheRepository interface {
 	Tags(names ...string) (TaggableStore, error)
 	Pull(key string, defVal ...interface{}) interface{}
 	Put(key string, value interface{}, ttl time.Duration) error
+	PutPure(key string, value interface{}, ttl time.Duration) error
 	Add(key string, value interface{}, ttl ...time.Duration) error
 	Increment(key string, value ...int64) error
 	Decrement(key string, value ...int64) error
 	Forever(key string, value interface{}) error
+	ForeverPure(key string, value interface{}) error
 	Remember(key string, ttl time.Duration, closure CacheClosure, ptr interface{}, force ...bool) error
 	Sear(key string, closure CacheClosure, ptr interface{}, force ...bool) error
 	RememberForever(key string, closure CacheClosure, ptr interface{}, force ...bool) error
