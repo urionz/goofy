@@ -46,16 +46,22 @@ func (*BaseStore) Many(_ []string) []interface{} {
 func (*BaseStore) Put(_ string, _ interface{}, _ time.Duration) error {
 	return nil
 }
+func (*BaseStore) PutInt(_ string, _ int64, _ time.Duration) error {
+	return nil
+}
 func (*BaseStore) PutMany(_ map[string]interface{}, _ int) error {
 	return nil
 }
-func (*BaseStore) Increment(_ string, _ ...int) error {
+func (*BaseStore) Increment(_ string, _ ...int64) error {
 	return nil
 }
-func (*BaseStore) Decrement(_ string, _ ...int) error {
+func (*BaseStore) Decrement(_ string, _ ...int64) error {
 	return nil
 }
 func (*BaseStore) Forever(_ string, _ interface{}) error {
+	return nil
+}
+func (*BaseStore) ForeverInt(_ string, _ int64) error {
 	return nil
 }
 func (*BaseStore) Forget(_ string) error {
@@ -87,10 +93,10 @@ func (*BaseRepository) Put(_ string, _ interface{}, _ time.Duration) error {
 func (*BaseRepository) Add(_ string, _ interface{}, _ ...time.Duration) error {
 	return nil
 }
-func (*BaseRepository) Increment(_ string, _ ...int) error {
+func (*BaseRepository) Increment(_ string, _ ...int64) error {
 	return nil
 }
-func (*BaseRepository) Decrement(_ string, _ ...int) error {
+func (*BaseRepository) Decrement(_ string, _ ...int64) error {
 	return nil
 }
 func (*BaseRepository) Forever(_ string, _ interface{}) error {

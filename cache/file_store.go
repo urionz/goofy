@@ -19,6 +19,14 @@ type FileStore struct {
 	BaseStore
 }
 
+func (f *FileStore) PutInt(key string, value int64, seconds time.Duration) error {
+	panic("implement me")
+}
+
+func (f *FileStore) ForeverInt(key string, value int64) error {
+	panic("implement me")
+}
+
 type DataPayload struct {
 	Data interface{} `json:"data"`
 	Time int64       `json:"time"`
@@ -112,10 +120,10 @@ func (f *FileStore) Has(key string) bool {
 	return false
 }
 
-func (f *FileStore) Increment(key string, steps ...int) error {
+func (f *FileStore) Increment(key string, steps ...int64) error {
 	panic("not implement")
 }
-func (f *FileStore) Decrement(key string, steps ...int) error {
+func (f *FileStore) Decrement(key string, steps ...int64) error {
 	panic("not implement")
 }
 

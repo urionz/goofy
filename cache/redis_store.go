@@ -47,8 +47,16 @@ func (r *RedisStore) Put(key string, value interface{}, seconds time.Duration) e
 	return r.Connection().Set(key, string(raw), seconds)
 }
 
+func (r *RedisStore) PutInt(key string, value int64, seconds time.Duration) error {
+	return r.Connection().Set(key, value, seconds)
+}
+
 func (r *RedisStore) Forever(key string, value interface{}) error {
 	return r.Set(key, value, 0)
+}
+
+func (r *RedisStore) ForeverInt(key string, value int64) error {
+	return r.PutInt(key, value, 0)
 }
 
 func (r *RedisStore) Forget(key string) error {
@@ -63,19 +71,19 @@ func (r *RedisStore) Tags(names ...string) (contracts.TaggableStore, error) {
 	return NewRedisTaggedCache(r, NewTagSet(r, names...)), nil
 }
 
-func (r *RedisStore) Increment(key string, steps ...int) error {
-	step := 1
+func (r *RedisStore) Increment(key string, steps ...int64) error {
+	var step int64 = 1
 	if len(steps) == 0 {
 		step = steps[0]
 	}
-	return r.Connection().IncrBy(key, int64(step))
+	return r.Connection().IncrBy(key, step)
 }
-func (r *RedisStore) Decrement(key string, steps ...int) error {
-	step := 1
+func (r *RedisStore) Decrement(key string, steps ...int64) error {
+	var step int64 = 1
 	if len(steps) == 0 {
 		step = steps[0]
 	}
-	return r.Connection().DecrBy(key, int64(step))
+	return r.Connection().DecrBy(key, step)
 }
 
 func (r *RedisStore) ItemKey(key string) string {

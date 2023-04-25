@@ -72,6 +72,18 @@ func (repo *Repository) Put(key string, value interface{}, ttl time.Duration) er
 	return repo.store.Put(repo.store.ItemKey(key), value, seconds)
 }
 
+func (repo *Repository) PutInt(key string, value int64, ttl time.Duration) error {
+	if ttl == 0 {
+		return repo.ForeverInt(key, value)
+	}
+
+	seconds := repo.getSeconds(ttl)
+	if seconds <= 0 {
+		return repo.Forget(key)
+	}
+	return repo.store.PutInt(repo.store.ItemKey(key), value, ttl)
+}
+
 func (repo *Repository) Tags(names ...string) (contracts.TaggableStore, error) {
 	typeof := reflect.TypeOf(repo.store)
 	if _, exists := typeof.MethodByName("Tags"); !exists {
@@ -99,6 +111,10 @@ func (repo *Repository) getSeconds(ttl time.Duration) time.Duration {
 
 func (repo *Repository) Forever(key string, value interface{}) error {
 	return repo.store.Forever(repo.store.ItemKey(key), value)
+}
+
+func (repo *Repository) ForeverInt(key string, value int64) error {
+	return repo.store.ForeverInt(repo.store.ItemKey(key), value)
 }
 
 func (repo *Repository) Forget(key string) error {
@@ -159,9 +175,9 @@ func (repo *Repository) Has(key string) bool {
 	return repo.store.Has(key)
 }
 
-func (repo *Repository) Increment(key string, steps ...int) error {
+func (repo *Repository) Increment(key string, steps ...int64) error {
 	return repo.store.Increment(key, steps...)
 }
-func (repo *Repository) Decrement(key string, steps ...int) error {
+func (repo *Repository) Decrement(key string, steps ...int64) error {
 	return repo.store.Decrement(key, steps...)
 }
